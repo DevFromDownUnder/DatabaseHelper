@@ -17,14 +17,9 @@ namespace DatabaseHelper.Helpers
 
         public static async Task<List<string>> GetRegisteredNetworkServers()
         {
-            return await Task.Run(async () =>
+            return await Task.Run(() =>
             {
-                await SQLBrowserHelper.broadcast();
-
-                return SmoApplication.EnumAvailableSqlServers()
-                                     .AsEnumerable()
-                                     .Select((r) => string.IsNullOrEmpty(r.Field<string>("InstanceName")) ? r.Field<string>("ServerName") : r.Field<string>("ServerName") + "\\" + r.Field<string>("InstanceName"))
-                                     .ToList();
+                return new List<string>();
             });
         }
 
