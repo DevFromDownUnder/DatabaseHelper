@@ -1,0 +1,3 @@
+﻿RESTORE DATABASE [{@SourceDatabaseName}] 
+FROM DATABASE_SNAPSHOT = '{@SnapshotName}'
+WITH RECOVERY;

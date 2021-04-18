@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CalcBinding" Version="2.5.2" />
+    <PackageReference Include="MaterialDesignThemes" Version="4.0.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="3.0.0-preview1.21075.2" />
+    <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="161.46041.41" />
+    <PackageReference Include="PropertyChanged.Fody" Version="3.3.3" />
+    <PackageReference Include="SmartFormat.NET" Version="2.6.2" />
+    <PackageReference Include="Swordfish.NET.CollectionsV3" Version="3.3.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="SQL\CreateSnapshot.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SQL\DeleteDatabase.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SQL\DeleteSnapshot.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SQL\GetDatabases.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SQL\GetSnapshots.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SQL\KillExistingConnections.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SQL\RestoreSnapshot.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
