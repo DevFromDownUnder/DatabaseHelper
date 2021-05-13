@@ -3,10 +3,7 @@ using DatabaseHelper.Extensions;
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
-using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace DatabaseHelper.Helpers
@@ -14,25 +11,6 @@ namespace DatabaseHelper.Helpers
     public class SQLHelper
     {
         public const string MASTER_DB = "master";
-
-        public static async Task<List<string>> GetRegisteredNetworkServers()
-        {
-            return await Task.Run(() =>
-            {
-                return new List<string>();
-            });
-        }
-
-        public static async Task<List<string>> GetRegisteredLocalServers()
-        {
-            return await Task.Run(() =>
-            {
-                return SmoApplication.EnumAvailableSqlServers(true)
-                                     .AsEnumerable()
-                                     .Select((r) => string.IsNullOrEmpty(r.Field<string>("InstanceName")) ? r.Field<string>("ServerName") : r.Field<string>("ServerName") + "\\" + r.Field<string>("InstanceName"))
-                                     .ToList();
-            });
-        }
 
         public static async Task<DataSet> RunSmartCommand(string connectionString,
                                                           string command,

@@ -43,5 +43,9 @@ namespace DatabaseHelper
         {
             SettingsHelper.UpdateConnectionDetails(SettingsHelper.Settings);
         }
+
+        private void DialogHost_DialogOpened(object sender, MaterialDesignThemes.Wpf.DialogOpenedEventArgs eventArgs)
+        {
+        }
     }
 }

@@ -30,11 +30,136 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
+        <Grid.Resources>
+            <Grid x:Key="ImportExportDialog"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch"
+                  ButtonBase.Click="ImportExportDialog_Click"
+                  Loaded="ImportExportDialog_Loaded">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <ScrollViewer Grid.Row="0"
+                              Grid.Column="0"
+                              VerticalAlignment="Stretch"
+                              VerticalContentAlignment="Stretch"
+                              HorizontalScrollBarVisibility="Auto"
+                              Style="{DynamicResource MaterialDesignScrollViewer}"
+                              VerticalScrollBarVisibility="Auto">
+                    <TextBox Name="txtJson"
+                             Padding="2,0,2,0"
+                             HorizontalAlignment="Stretch"
+                             VerticalAlignment="Stretch"
+                             materialDesign:HintAssist.Hint="Settings JSON"
+                             AcceptsReturn="True"
+                             FontSize="11"
+                             Style="{DynamicResource MaterialDesignFloatingHintTextBox}" />
+                </ScrollViewer>
+                <Grid Grid.Row="1" Grid.Column="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ToolBarTray Grid.Column="0" IsLocked="True" />
+                    <ToolBarTray Grid.Column="1" IsLocked="True">
+                        <ToolBar Style="{DynamicResource MaterialDesignToolBar}">
+                            <Button Command="materialDesign:DialogHost.CloseDialogCommand" Style="{DynamicResource MaterialDesignFlatButton}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="24" />
+                                        <ColumnDefinition Width="5" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <materialDesign:PackIcon Grid.Column="0"
+                                                             VerticalAlignment="Center"
+                                                             Kind="Cancel" />
+                                    <TextBlock Grid.Column="2"
+                                               VerticalAlignment="Center"
+                                               Text="Cancel" />
+                                </Grid>
+                            </Button>
+                            <Separator />
+                            <Button Style="{DynamicResource MaterialDesignFlatButton}" Tag="Format">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="24" />
+                                        <ColumnDefinition Width="5" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <materialDesign:PackIcon Grid.Column="0"
+                                                             VerticalAlignment="Center"
+                                                             Kind="CodeTags" />
+                                    <TextBlock Grid.Column="2"
+                                               VerticalAlignment="Center"
+                                               Text="Format" />
+                                </Grid>
+                            </Button>
+                            <Separator />
+                            <Button Style="{DynamicResource MaterialDesignFlatButton}" Tag="Parse">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="24" />
+                                        <ColumnDefinition Width="5" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <materialDesign:PackIcon Grid.Column="0"
+                                                             VerticalAlignment="Center"
+                                                             Kind="CodeTagsCheck" />
+                                    <TextBlock Grid.Column="2"
+                                               VerticalAlignment="Center"
+                                               Text="Parse" />
+                                </Grid>
+                            </Button>
+                            <Separator />
+                            <Button Command="materialDesign:DialogHost.CloseDialogCommand"
+                                    Style="{DynamicResource MaterialDesignFlatButton}"
+                                    Tag="Import">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="24" />
+                                        <ColumnDefinition Width="5" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <materialDesign:PackIcon Grid.Column="0"
+                                                             VerticalAlignment="Center"
+                                                             Kind="Import" />
+                                    <TextBlock Grid.Column="2"
+                                               VerticalAlignment="Center"
+                                               Text="Import" />
+                                </Grid>
+                            </Button>
+                            <Separator />
+                            <Button Command="materialDesign:DialogHost.CloseDialogCommand"
+                                    Style="{DynamicResource MaterialDesignFlatButton}"
+                                    Tag="Export">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="24" />
+                                        <ColumnDefinition Width="5" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <materialDesign:PackIcon Grid.Column="0"
+                                                             VerticalAlignment="Center"
+                                                             Kind="Export" />
+                                    <TextBlock Grid.Column="2"
+                                               VerticalAlignment="Center"
+                                               Text="Export" />
+                                </Grid>
+                            </Button>
+                        </ToolBar>
+                    </ToolBarTray>
+                </Grid>
+            </Grid>
+        </Grid.Resources>
         <ToolBarTray Grid.Row="0"
                      Grid.Column="0"
                      IsLocked="True">
             <ToolBar ClipToBounds="False" Style="{DynamicResource MaterialDesignToolBar}">
-                <Button Style="{DynamicResource MaterialDesignFlatButton}">
+                <Button Name="btnSave" Style="{DynamicResource MaterialDesignFlatButton}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="24" />
@@ -47,6 +172,24 @@
                         <TextBlock Grid.Column="2"
                                    VerticalAlignment="Center"
                                    Text="Save" />
+                    </Grid>
+                </Button>
+                <Separator />
+                <Button Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}"
+                        CommandParameter="{StaticResource ImportExportDialog}"
+                        Style="{DynamicResource MaterialDesignFlatButton}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="24" />
+                            <ColumnDefinition Width="5" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <materialDesign:PackIcon Grid.Column="0"
+                                                 VerticalAlignment="Center"
+                                                 Kind="ImportExport" />
+                        <TextBlock Grid.Column="2"
+                                   VerticalAlignment="Center"
+                                   Text="Import/Export" />
                     </Grid>
                 </Button>
                 <Separator />
