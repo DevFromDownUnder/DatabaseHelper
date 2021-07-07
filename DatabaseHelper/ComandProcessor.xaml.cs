@@ -1,4 +1,6 @@
 ﻿using DatabaseHelper.Contracts;
+using MaterialDesignExtensions.Controls;
+using Microsoft.Data.SqlClient;
 using PropertyChanged;
 using System;
 using System.Collections.Generic;
@@ -6,6 +8,9 @@ using System.ComponentModel;
 using System.Data;
 using System.Windows;
 using System.Windows.Controls;
+using DatabaseHelper.Extensions;
+using DatabaseHelper.Helpers;
+using Microsoft.SqlServer.Management.Common;
 
 namespace DatabaseHelper
 {
@@ -13,12 +18,14 @@ namespace DatabaseHelper
     /// Interaction logic for ComandProcessor.xaml
     /// </summary>
     [AddINotifyPropertyChangedInterface]
-    public partial class ComandProcessor : Window
+    public partial class ComandProcessor : MaterialWindow
     {
         private BackgroundWorker mBackgroundWorker;
         private Dictionary<Guid, DataView> mResults;
 
         public SQLConnectionDetails ConnectionDetails { get; set; }
+        public string Query { get; set; }
+        public SqlParameterCollection Parameters { get; set; }
 
         public ComandProcessor(SQLConnectionDetails connectionDetails)
         {
@@ -45,6 +52,8 @@ namespace DatabaseHelper
             txtResults.Visibility = Visibility.Collapsed;
             cmbResultSet.Visibility = Visibility.Collapsed;
             dgResults.Visibility = Visibility.Collapsed;
+
+            txtCommand.Text = Query.SmartSQLFormat(Parameters);
         }
 
         private void StartExecution()
@@ -78,21 +87,6 @@ namespace DatabaseHelper
             mBackgroundWorker.RunWorkerCompleted += mBackgroundWorker_RunWorkerCompleted;
 
             mBackgroundWorker.RunWorkerAsync();
-        }
-
-        private DataView GetFakeDataView()
-        {
-            DataTable dataTable = new(DateTime.Now.Ticks.ToString());
-
-            dataTable.Columns.Add("Select", typeof(Boolean));
-            dataTable.Columns.Add("DatabaseName", typeof(String));
-            dataTable.Columns.Add("DatabaseDataName", typeof(String));
-            dataTable.Columns.Add("DatabaseFilename", typeof(String));
-
-            for (int i = 0; i < 20; i++)
-                dataTable.Rows.Add(false, "DatabaseName " + i, "DataName " + i, "DatabaseFilename " + DateTime.Now.Ticks.ToString());
-
-            return dataTable.DefaultView;
         }
 
         private void mBackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -137,7 +131,14 @@ namespace DatabaseHelper
         {
             BackgroundWorker worker = sender as BackgroundWorker;
 
-            while (true)
+            List<string> queries = new();
+
+            //Need to double check if this needs to split for GO's
+            queries.Add(Query);
+
+            var connectionString = SQLHelper.GetConnectionString(ConnectionDetails);
+
+            foreach (var query in queries)
             {
                 if (worker.CancellationPending)
                 {
@@ -146,10 +147,26 @@ namespace DatabaseHelper
                 }
                 else
                 {
-                    System.Threading.Thread.Sleep(1000);
-                    worker.ReportProgress(5, new Tuple<Guid, String, DataView>(Guid.NewGuid(), Guid.NewGuid().ToString(), GetFakeDataView()));
+                    var execution = SQLHelper.RunSmartCommand(connectionString,
+                                                              query,
+                                                              Parameters,
+                                                              (object sender, ServerMessageEventArgs e) =>
+                                                              {
+                                                                  //Just throw our errors up for now
+                                                                  throw new Exception(e.Error.Message);
+                                                              });
+
+                    while (!execution.IsCompleted)
+                    {
+                        execution.Wait(1);
+                    }
                 }
             }
+        }
+
+        private void msgReport(object sender, ServerMessageEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         private void StopExecution()

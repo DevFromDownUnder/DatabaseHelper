@@ -31,11 +31,11 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid.Resources>
-            <Grid x:Key="ImportExportDialog"
+            <Grid x:Key="EditJsonDialog"
                   HorizontalAlignment="Stretch"
                   VerticalAlignment="Stretch"
-                  ButtonBase.Click="ImportExportDialog_Click"
-                  Loaded="ImportExportDialog_Loaded">
+                  ButtonBase.Click="EditJsonDialog_Click"
+                  Loaded="EditJsonDialog_Loaded">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
@@ -117,7 +117,7 @@
                             <Separator />
                             <Button Command="materialDesign:DialogHost.CloseDialogCommand"
                                     Style="{DynamicResource MaterialDesignFlatButton}"
-                                    Tag="Import">
+                                    Tag="Save">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="24" />
@@ -126,16 +126,69 @@
                                     </Grid.ColumnDefinitions>
                                     <materialDesign:PackIcon Grid.Column="0"
                                                              VerticalAlignment="Center"
-                                                             Kind="Import" />
+                                                             Kind="ContentSave" />
                                     <TextBlock Grid.Column="2"
                                                VerticalAlignment="Center"
-                                               Text="Import" />
+                                               Text="Save" />
+                                </Grid>
+                            </Button>
+                        </ToolBar>
+                    </ToolBarTray>
+                </Grid>
+            </Grid>
+            <Grid x:Key="AddServerDialog"
+                  Width="220"
+                  Height="125"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center"
+                  ButtonBase.Click="AddServerDialog_Click"
+                  Loaded="AddServerDialog_Loaded">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Row="0"
+                            Grid.Column="0"
+                            Margin="4">
+                    <TextBox Name="txtAddServerServer"
+                             HorizontalAlignment="Stretch"
+                             materialDesign:HintAssist.Hint="Server"
+                             Style="{DynamicResource MaterialDesignFloatingHintTextBox}" />
+                    <TextBox Name="txtAddServerPort"
+                             HorizontalAlignment="Stretch"
+                             materialDesign:HintAssist.Hint="Port"
+                             Style="{DynamicResource MaterialDesignFloatingHintTextBox}" />
+                </StackPanel>
+                <Grid Grid.Row="1" Grid.Column="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ToolBarTray Grid.Column="0" IsLocked="True" />
+                    <ToolBarTray Grid.Column="1" IsLocked="True">
+                        <ToolBar Style="{DynamicResource MaterialDesignToolBar}">
+                            <Button Command="materialDesign:DialogHost.CloseDialogCommand" Style="{DynamicResource MaterialDesignFlatButton}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="24" />
+                                        <ColumnDefinition Width="5" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <materialDesign:PackIcon Grid.Column="0"
+                                                             VerticalAlignment="Center"
+                                                             Kind="Cancel" />
+                                    <TextBlock Grid.Column="2"
+                                               VerticalAlignment="Center"
+                                               Text="Cancel" />
                                 </Grid>
                             </Button>
                             <Separator />
                             <Button Command="materialDesign:DialogHost.CloseDialogCommand"
                                     Style="{DynamicResource MaterialDesignFlatButton}"
-                                    Tag="Export">
+                                    Tag="Add">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="24" />
@@ -144,10 +197,10 @@
                                     </Grid.ColumnDefinitions>
                                     <materialDesign:PackIcon Grid.Column="0"
                                                              VerticalAlignment="Center"
-                                                             Kind="Export" />
+                                                             Kind="Add" />
                                     <TextBlock Grid.Column="2"
                                                VerticalAlignment="Center"
-                                               Text="Export" />
+                                               Text="Add" />
                                 </Grid>
                             </Button>
                         </ToolBar>
@@ -159,7 +212,10 @@
                      Grid.Column="0"
                      IsLocked="True">
             <ToolBar ClipToBounds="False" Style="{DynamicResource MaterialDesignToolBar}">
-                <Button Name="btnSave" Style="{DynamicResource MaterialDesignFlatButton}">
+                <Button Name="btnSave"
+                        Click="btnSave_Click"
+                        IsEnabled="{Binding Source={x:Static helpers:SettingsHelper.Settings}, Path=IsChanged}"
+                        Style="{DynamicResource MaterialDesignFlatButton}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="24" />
@@ -175,8 +231,8 @@
                     </Grid>
                 </Button>
                 <Separator />
-                <Button Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}"
-                        CommandParameter="{StaticResource ImportExportDialog}"
+                <Button Command="{x:Static helpers:FormHelper.OpenClickAwayStrechedCommand}"
+                        CommandParameter="{StaticResource EditJsonDialog}"
                         Style="{DynamicResource MaterialDesignFlatButton}">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -186,10 +242,64 @@
                         </Grid.ColumnDefinitions>
                         <materialDesign:PackIcon Grid.Column="0"
                                                  VerticalAlignment="Center"
-                                                 Kind="ImportExport" />
+                                                 Kind="CodeJson" />
                         <TextBlock Grid.Column="2"
                                    VerticalAlignment="Center"
-                                   Text="Import/Export" />
+                                   Text="Edit Json Settings" />
+                    </Grid>
+                </Button>
+                <Separator />
+                <Button Name="btnImport"
+                        Click="btnImport_Click"
+                        Style="{DynamicResource MaterialDesignFlatButton}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="24" />
+                            <ColumnDefinition Width="5" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <materialDesign:PackIcon Grid.Column="0"
+                                                 VerticalAlignment="Center"
+                                                 Kind="Import" />
+                        <TextBlock Grid.Column="2"
+                                   VerticalAlignment="Center"
+                                   Text="Import" />
+                    </Grid>
+                </Button>
+                <Separator />
+                <Button Name="btnExport"
+                        Click="btnExport_Click"
+                        Style="{DynamicResource MaterialDesignFlatButton}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="24" />
+                            <ColumnDefinition Width="5" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <materialDesign:PackIcon Grid.Column="0"
+                                                 VerticalAlignment="Center"
+                                                 Kind="Export" />
+                        <TextBlock Grid.Column="2"
+                                   VerticalAlignment="Center"
+                                   Text="Export" />
+                    </Grid>
+                </Button>
+                <Separator />
+                <Button Name="btnResetToDefault"
+                        Click="btnResetToDefault_Click"
+                        Style="{DynamicResource MaterialDesignFlatButton}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="24" />
+                            <ColumnDefinition Width="5" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <materialDesign:PackIcon Grid.Column="0"
+                                                 VerticalAlignment="Center"
+                                                 Kind="ReloadAlert" />
+                        <TextBlock Grid.Column="2"
+                                   VerticalAlignment="Center"
+                                   Text="Reset to Default" />
                     </Grid>
                 </Button>
                 <Separator />
@@ -302,7 +412,8 @@
                                     <Button Name="btnAddServer"
                                             Grid.Column="1"
                                             Margin="0,0,4,0"
-                                            Click="btnAddServer_Click"
+                                            Command="{x:Static helpers:FormHelper.OpenClickAwayCenteredCommand}"
+                                            CommandParameter="{StaticResource AddServerDialog}"
                                             Content="Add server"
                                             Style="{DynamicResource MaterialDesignFlatDarkBgButton}" />
                                     <Button Name="btnAddRegisteredLocalServers"
@@ -344,8 +455,15 @@
                         </GroupBox>
                         <ComboBox materialDesign:HintAssist.Hint="Preferred server"
                                   ItemsSource="{Binding Source={x:Static helpers:SettingsHelper.Settings}, Path=Server_Servers}"
-                                  SelectedValue="{Binding Source={x:Static helpers:SettingsHelper.Settings}, Path=Server_PreferredServer}"
-                                  Style="{DynamicResource MaterialDesignFloatingHintComboBox}" />
+                                  SelectedItem="{Binding Source={x:Static helpers:SettingsHelper.Settings}, Path=Server_PreferredServer}"
+                                  Style="{DynamicResource MaterialDesignFloatingHintComboBox}"
+                                  Text="{Binding Source={x:Static helpers:SettingsHelper.Settings}, Path=Server_PreferredServer.Server}" />
+                        <TextBox Name="txtPort"
+                                 HorizontalAlignment="Stretch"
+                                 materialDesign:HintAssist.Hint="Port"
+                                 IsEnabled="False"
+                                 Style="{DynamicResource MaterialDesignFloatingHintTextBox}"
+                                 Text="{Binding Source={x:Static helpers:SettingsHelper.Settings}, Path=Server_PreferredServer.Port}" />
                         <TextBox Name="txtDomain"
                                  HorizontalAlignment="Stretch"
                                  materialDesign:HintAssist.Hint="Domain"

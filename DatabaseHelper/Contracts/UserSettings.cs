@@ -9,6 +9,16 @@ namespace DatabaseHelper.Contracts
     [AddINotifyPropertyChangedInterface]
     public class UserSettings
     {
+        #region Change Tracking
+
+        private ObservableCollection<SQLServer> server_Servers;
+        private ConcurrentObservableDictionary<string, string> executeSavedFiles_Files;
+        private ConcurrentObservableDictionary<string, string> executeSavedQueries_Queries;
+
+        public bool IsChanged { get; set; }
+
+        #endregion Change Tracking
+
         #region Theme Event Handler Workarounds
 
         public event EventHandler<bool> Theme_IsDarkTheme_Changed;
@@ -35,9 +45,23 @@ namespace DatabaseHelper.Contracts
 
         #region Server Settings
 
-        public string Server_CurrentServer { get; set; }
-        public ObservableCollection<string> Server_Servers { get; set; }
-        public string Server_PreferredServer { get; set; }
+        public SQLServer Server_CurrentServer { get; set; }
+
+        public ObservableCollection<SQLServer> Server_Servers
+        {
+            get => server_Servers;
+            set
+            {
+                server_Servers = value;
+
+                if (server_Servers != null)
+                {
+                    server_Servers.CollectionChanged += (object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) => IsChanged = true;
+                }
+            }
+        }
+
+        public SQLServer Server_PreferredServer { get; set; }
         public string Server_Domain { get; set; }
         public string Server_Username { get; set; }
         public string Server_Password { get; set; }
@@ -79,7 +103,19 @@ namespace DatabaseHelper.Contracts
 
         #region Execute Saved Files Settings
 
-        public ConcurrentObservableDictionary<string, string> ExecuteSavedFiles_Files { get; set; }
+        public ConcurrentObservableDictionary<string, string> ExecuteSavedFiles_Files
+        {
+            get => executeSavedFiles_Files;
+            set
+            {
+                executeSavedFiles_Files = value;
+
+                if (executeSavedFiles_Files != null)
+                {
+                    executeSavedFiles_Files.CollectionChanged += (object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) => IsChanged = true;
+                }
+            }
+        }
 
         #endregion Execute Saved Files Settings
 
@@ -91,7 +127,19 @@ namespace DatabaseHelper.Contracts
 
         #region Execute Saved Queries Settings
 
-        public ConcurrentObservableDictionary<string, string> ExecuteSavedQueries_Queries { get; set; }
+        public ConcurrentObservableDictionary<string, string> ExecuteSavedQueries_Queries
+        {
+            get => executeSavedQueries_Queries;
+            set
+            {
+                executeSavedQueries_Queries = value;
+
+                if (executeSavedQueries_Queries != null)
+                {
+                    executeSavedQueries_Queries.CollectionChanged += (object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) => IsChanged = true;
+                }
+            }
+        }
 
         #endregion Execute Saved Queries Settings
     }

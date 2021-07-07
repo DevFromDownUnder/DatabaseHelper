@@ -1,13 +1,14 @@
-﻿using DatabaseHelper.Contracts;
-using DatabaseHelper.Extensions;
+﻿using DatabaseHelper.Extensions;
 using DatabaseHelper.Helpers;
 using Microsoft.Toolkit.Uwp.UI;
+using System;
 using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+
+//using MaterialDesignExtensions.Controls;
 
 namespace DatabaseHelper.Pages
 {
@@ -34,9 +35,9 @@ namespace DatabaseHelper.Pages
         {
             if (e.Source is Hyperlink item)
             {
-                if (item.DataContext != null && SettingsHelper.Settings.Server_Servers.Contains(item.DataContext.ToString()))
+                if (item.DataContext != null && SettingsHelper.Settings.Server_Servers.Any((x) => x.Server == item.DataContext.ToString()))
                 {
-                    SettingsHelper.Settings.Server_Servers.Remove(item.DataContext.ToString());
+                    SettingsHelper.Settings.Server_Servers.Remove(SettingsHelper.Settings.Server_Servers.First((x) => x.Server == item.DataContext.ToString()));
                 }
             }
         }
@@ -67,16 +68,78 @@ namespace DatabaseHelper.Pages
             }, (Button)sender);
         }
 
-        private void btnAddServer_Click(object sender, RoutedEventArgs e)
-        {
-        }
-
         private void SecurtiyType_CheckChange(object sender, RoutedEventArgs e)
         {
             SettingsHelper.UpdateConnectionDetails(SettingsHelper.Settings);
         }
 
-        private async void ImportExportDialog_Click(object sender, RoutedEventArgs e)
+        private async void AddServerDialog_Click(object sender, RoutedEventArgs e)
+        {
+            if (e.Source is Button btnSource)
+            {
+                if (sender is FrameworkElement dialogElement)
+                {
+                    if (dialogElement.FindDescendant("txtAddServerServer") is TextBox txtAddServerServer)
+                    {
+                        if (dialogElement.FindDescendant("txtAddServerPort") is TextBox txtAddServerPort)
+                        {
+                            if (btnSource.Tag != null)
+                            {
+                                var server = txtAddServerServer.Text.Trim();
+                                var port = txtAddServerPort.Text.Trim();
+
+                                switch (btnSource.Tag.ToString())
+                                {
+                                    case "Add":
+                                        await FormHelper.ExceptionDialogHandler(
+                                            Task.Run(() =>
+                                            {
+                                                if (server.HasNoValue())
+                                                {
+                                                    throw new ArgumentException("Server must be populated");
+                                                }
+
+                                                if (port.HasNoValue())
+                                                {
+                                                    throw new ArgumentException("Port must be populated");
+                                                }
+
+                                                if (!ushort.TryParse(port, out ushort serverPort))
+                                                {
+                                                    throw new ArgumentException($"Port must be between {ushort.MinValue} and {ushort.MaxValue}");
+                                                }
+
+                                                if (!SettingsHelper.Settings.Server_Servers.Any((x) => x.Server == server))
+                                                {
+                                                    Dispatcher.Invoke(() => SettingsHelper.Settings.Server_Servers.Add(new() { Server = server, Port = serverPort }));
+                                                }
+                                            })
+                                        );
+
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void AddServerDialog_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (e.Source is Grid)
+            {
+                if (sender is FrameworkElement dialogElement)
+                {
+                    if (dialogElement.FindDescendant("txtAddServerPort") is TextBox txtAddServerPort)
+                    {
+                        txtAddServerPort.Text = DevFromDownUnder.SQLBrowser.SQL.Architecture.DEFAULT_TCP_PORT.ToString();
+                    }
+                }
+            }
+        }
+
+        private async void EditJsonDialog_Click(object sender, RoutedEventArgs e)
         {
             if (e.Source is Button btnSource)
             {
@@ -90,31 +153,25 @@ namespace DatabaseHelper.Pages
 
                             switch (btnSource.Tag.ToString())
                             {
-                                case "Import":
-                                    await FormHelper.ExceptionDialogHandler(() =>
-                                          FormHelper.LoadingFlatDarkBgButton(() => SettingsHelper.Settings = ParseUserSettingsJson(json), btnSource)
-                                    );
-
-                                    break;
-
-                                case "Export":
-                                    await FormHelper.ExceptionDialogHandler(() =>
-                                        FormHelper.LoadingFlatDarkBgButton(() => Dispatcher.Invoke(() => txtJson.Text = GetSettingsJson()), btnSource)
+                                case "Save":
+                                    await FormHelper.ExceptionDialogHandler(
+                                          FormHelper.LoadingFlatDarkBgButton(() => SettingsHelper.UpdateSettings(SettingsHelper.ParseUserSettingsJson(json)), btnSource)
                                     );
 
                                     break;
 
                                 case "Parse":
-                                    await FormHelper.ExceptionDialogHandler(() =>
-                                        FormHelper.LoadingFlatDarkBgButton(() => ParseUserSettingsJson(json), btnSource)
+                                    await FormHelper.ExceptionDialogHandler(
+                                        FormHelper.LoadingFlatDarkBgButton(() => SettingsHelper.ParseUserSettingsJson(json), btnSource)
                                     );
 
                                     break;
 
                                 case "Format":
-                                    await FormHelper.ExceptionDialogHandler(() =>
-                                        FormHelper.LoadingFlatDarkBgButton(() => Dispatcher.Invoke(() => txtJson.Text = FormatJson(json)), btnSource)
+                                    await FormHelper.ExceptionDialogHandler(
+                                        FormHelper.LoadingFlatDarkBgButton(() => Dispatcher.Invoke(() => txtJson.Text = SettingsHelper.FormatUserSettingsJson(json)), btnSource)
                                     );
+
                                     break;
                             }
                         }
@@ -123,34 +180,62 @@ namespace DatabaseHelper.Pages
             }
         }
 
-        private string GetSettingsJson()
+        private void EditJsonDialog_Loaded(object sender, RoutedEventArgs e)
         {
-            return JsonSerializer.Serialize(SettingsHelper.Settings, new() { WriteIndented = true, Converters = { new JsonStringEnumConverter() } });
-        }
-
-        private string FormatJson(string json)
-        {
-            var settings = ParseUserSettingsJson(json);
-
-            return JsonSerializer.Serialize(settings, new() { WriteIndented = true, Converters = { new JsonStringEnumConverter() } });
-        }
-
-        private UserSettings ParseUserSettingsJson(string json)
-        {
-            return JsonSerializer.Deserialize<UserSettings>(json);
-        }
-
-        private void ImportExportDialog_Loaded(object sender, RoutedEventArgs e)
-        {
-            if (e.Source is Grid source)
+            if (e.Source is Grid)
             {
                 if (sender is FrameworkElement dialogElement)
                 {
-                    if (dialogElement.FindDescendant("txtJson") is TextBox txtScript)
+                    if (dialogElement.FindDescendant("txtJson") is TextBox txtJson)
                     {
-                        txtScript.Text = GetSettingsJson();
+                        txtJson.Text = SettingsHelper.GetSettingsJson();
                     }
                 }
+            }
+        }
+
+        private void btnResetToDefault_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsHelper.UpdateSettings(SettingsHelper.GetDefaultSettings());
+        }
+
+        private async void btnSave_Click(object sender, RoutedEventArgs e)
+        {
+            await SettingsHelper.SaveSettings();
+        }
+
+        private async void btnImport_Click(object sender, RoutedEventArgs e)
+        {
+            var saveFileDialog = new Microsoft.Win32.OpenFileDialog()
+            {
+                AddExtension = true,
+                InitialDirectory = System.IO.Directory.GetCurrentDirectory(),
+                Filter = "JSON files|*.json|All files|*.*"
+            };
+
+            if (saveFileDialog.ShowDialog() ?? false)
+            {
+                await FormHelper.ExceptionDialogHandler(
+                    SettingsHelper.LoadSettings(true, saveFileDialog.FileName)
+                );
+            }
+        }
+
+        private async void btnExport_Click(object sender, RoutedEventArgs e)
+        {
+            var saveFileDialog = new Microsoft.Win32.SaveFileDialog()
+            {
+                AddExtension = true,
+                DefaultExt = ".json",
+                InitialDirectory = System.IO.Directory.GetCurrentDirectory(),
+                Filter = "JSON files|*.json|All files|*.*"
+            };
+
+            if (saveFileDialog.ShowDialog() ?? false)
+            {
+                await FormHelper.ExceptionDialogHandler(
+                    SettingsHelper.SaveSettings(false, saveFileDialog.FileName)
+                );
             }
         }
     }

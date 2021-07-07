@@ -1,34 +1,77 @@
-﻿using MaterialDesignThemes.Wpf;
+﻿using DatabaseHelper.Contracts;
+using MaterialDesignThemes.Wpf;
 
 namespace DatabaseHelper.Helpers
 {
     internal class ThemeHelper
     {
-        public static void BindTheme()
+        public static void BindTheme() => BindTheme(SettingsHelper.Settings);
+
+        public static void BindTheme(UserSettings settings)
         {
-            SettingsHelper.Settings.Theme_IsDarkTheme_Changed += ChangeTheme;
-            SettingsHelper.Settings.Theme_PrimaryColor_Changed += ChangePrimaryColor;
-            SettingsHelper.Settings.Theme_SecondaryColor_Changed += ChangeSecondaryColor;
+            if (settings != null)
+            {
+                settings.Theme_IsDarkTheme_Changed += ChangeTheme;
+                settings.Theme_PrimaryColor_Changed += ChangePrimaryColor;
+                settings.Theme_SecondaryColor_Changed += ChangeSecondaryColor;
+            }
+        }
+
+        public static void UnBindTheme() => UnBindTheme(SettingsHelper.Settings);
+
+        public static void UnBindTheme(UserSettings settings)
+        {
+            if (settings != null)
+            {
+                settings.Theme_IsDarkTheme_Changed -= ChangeTheme;
+                settings.Theme_PrimaryColor_Changed -= ChangePrimaryColor;
+                settings.Theme_SecondaryColor_Changed -= ChangeSecondaryColor;
+            }
+        }
+
+        public static void RefreshTheme()
+        {
+            if (SettingsHelper.Settings != null)
+            {
+                ChangeTheme(null, SettingsHelper.Settings.Theme_IsDarkTheme);
+                ChangePrimaryColor(null, SettingsHelper.Settings.Theme_PrimaryColor);
+                ChangeSecondaryColor(null, SettingsHelper.Settings.Theme_SecondaryColor);
+            }
         }
 
         public static void ChangePrimaryColor(object sender, System.Windows.Media.Color color)
         {
+            //OG MD
             var palette = new PaletteHelper();
             var theme = palette.GetTheme();
             theme.SetPrimaryColor(color);
             palette.SetTheme(theme);
+
+            //Ext MD
+            var paletteExt = new PaletteHelper();
+            var themeExt = paletteExt.GetTheme();
+            themeExt.SetPrimaryColor(color);
+            paletteExt.SetTheme(themeExt);
         }
 
         public static void ChangeSecondaryColor(object sender, System.Windows.Media.Color color)
         {
+            //OG MD
             var palette = new PaletteHelper();
             var theme = palette.GetTheme();
             theme.SetSecondaryColor(color);
             palette.SetTheme(theme);
+
+            //Ext MD
+            var paletteExt = new PaletteHelper();
+            var themeExt = paletteExt.GetTheme();
+            themeExt.SetSecondaryColor(color);
+            paletteExt.SetTheme(themeExt);
         }
 
         public static void ChangeTheme(object sender, bool isDarkTheme)
         {
+            //OG MD
             var palette = new PaletteHelper();
             var theme = palette.GetTheme();
 
@@ -42,6 +85,21 @@ namespace DatabaseHelper.Helpers
             }
 
             palette.SetTheme(theme);
+
+            //Ext MD
+            var paletteExt = new PaletteHelper();
+            var themeExt = palette.GetTheme();
+
+            if (isDarkTheme)
+            {
+                themeExt.SetBaseTheme((IBaseTheme)new MaterialDesignDarkTheme());
+            }
+            else
+            {
+                themeExt.SetBaseTheme((IBaseTheme)new MaterialDesignLightTheme());
+            }
+
+            paletteExt.SetTheme(themeExt);
         }
     }
 }

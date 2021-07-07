@@ -34,15 +34,25 @@ namespace DatabaseHelper.Pages
 
         private async void btnRefresh_Click(object sender, RoutedEventArgs e)
         {
-            await FormHelper.ExceptionDialogHandler(() =>
-                FormHelper.LoadingFlatDarkBgButton(Refresh, (Button)sender)
+            await FormHelper.ExceptionDialogHandler(
+                FormHelper.LoadingFlatDarkBgButton(Refresh(), (Button)sender)
             );
         }
 
         private void btnExecute_Click(object sender, RoutedEventArgs e)
         {
-            ComandProcessor processor = FormHelper.GetNewCommandProcessor("test");
-            processor.ShowDialog();
+            if (dgDatabases.SelectedItem != null)
+            {
+                if (dgDatabases.SelectedItem is System.Data.DataRowView row)
+                {
+                    var (query, parameters) = SQLQueriesHelper.GetRestoreSnapshot(row["SnapshotName"].ToString());
+
+                    ComandProcessor processor = FormHelper.GetNewCommandProcessor();
+                    processor.Query = query;
+                    processor.Parameters = parameters;
+                    processor.ShowDialog();
+                }
+            }
         }
     }
 }

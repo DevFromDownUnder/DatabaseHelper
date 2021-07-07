@@ -34,8 +34,8 @@ namespace DatabaseHelper.Pages
 
         private async void btnRefresh_Click(object sender, RoutedEventArgs e)
         {
-            await FormHelper.ExceptionDialogHandler(() =>
-                FormHelper.LoadingFlatDarkBgButton(Refresh, (Button)sender)
+            await FormHelper.ExceptionDialogHandler(
+                FormHelper.LoadingFlatDarkBgButton(Refresh(), (Button)sender)
             );
         }
 

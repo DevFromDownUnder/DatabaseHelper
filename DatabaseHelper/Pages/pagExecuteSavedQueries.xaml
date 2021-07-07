@@ -2,6 +2,7 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:helpers="clr-namespace:DatabaseHelper.Helpers"
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       Title="pagExecuteSavedQueries"
@@ -278,7 +279,7 @@
                         <DataTemplate>
                             <Button Name="btnEdit"
                                     Padding="0"
-                                    Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}"
+                                    Command="{x:Static helpers:FormHelper.OpenClickAwayStrechedCommand}"
                                     CommandParameter="{StaticResource EditDialog}"
                                     Style="{DynamicResource MaterialDesignFlatDarkBgButton}">
                                 <materialDesign:PackIcon Kind="Edit" />
@@ -291,7 +292,7 @@
                         <DataTemplate>
                             <Button Name="btnDelete"
                                     Padding="0"
-                                    Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}"
+                                    Command="{x:Static helpers:FormHelper.OpenClickAwayStrechedCommand}"
                                     CommandParameter="{StaticResource DeleteDialog}"
                                     Style="{DynamicResource MaterialDesignFlatDarkBgButton}">
                                 <materialDesign:PackIcon Kind="Delete" />

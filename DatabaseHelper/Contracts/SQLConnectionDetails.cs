@@ -6,6 +6,7 @@ namespace DatabaseHelper.Contracts
     public class SQLConnectionDetails
     {
         public string Server { get; set; }
+        public ushort Port { get; set; }
         public string Database { get; set; }
         public string Domain { get; set; }
         public string Username { get; set; }
