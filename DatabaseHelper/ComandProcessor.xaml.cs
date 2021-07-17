@@ -35,10 +35,9 @@ namespace DatabaseHelper
         }
 
         public SQLConnectionDetails ConnectionDetails { get; set; }
-        public string DatabaseToKill { get; set; }
+        public string[] DatabasesToKill { get; set; }
         public bool KillExistingConnections { get; set; }
-        public SqlParameterCollection Parameters { get; set; }
-        public string[] Queries { get; set; }
+        public SQLQuery[] Queries { get; set; }
         public ConcurrentObservableDictionary<Guid, DataSet> Results { get; set; }
 
         private void btnAbort_Click(object sender, RoutedEventArgs e)
@@ -108,12 +107,15 @@ namespace DatabaseHelper
 
             if (KillExistingConnections)
             {
-                SQLQueriesHelper.KillExistingConnections(ConnectionDetails,
-                                                         DatabaseToKill,
-                                                         (object sender, ServerMessageEventArgs e) => mBackgroundWorker.ReportProgress(0, e.Error.ToString()),
-                                                         (object sender, SqlInfoMessageEventArgs e) => mBackgroundWorker.ReportProgress(0, e.Message)).Wait();
+                foreach (var databaseToKill in DatabasesToKill)
+                {
+                    SQLQueriesHelper.KillExistingConnections(ConnectionDetails,
+                                                             databaseToKill,
+                                                             (object sender, ServerMessageEventArgs e) => mBackgroundWorker.ReportProgress(e.Error.ToString()),
+                                                             (object sender, SqlInfoMessageEventArgs e) => mBackgroundWorker.ReportProgress(e.Message)).Wait();
 
-                mBackgroundWorker.ReportProgress(0, ("Existing connections killed"));
+                    mBackgroundWorker.ReportProgress($"Existing connections killed - [{databaseToKill}]");
+                }
             }
 
             foreach (var query in Queries)
@@ -126,10 +128,10 @@ namespace DatabaseHelper
                 else
                 {
                     var execution = SQLHelper.RunSmartCommand(connectionString,
-                                                              query,
-                                                              Parameters,
-                                                              (object sender, ServerMessageEventArgs e) => mBackgroundWorker.ReportProgress(0, e.Error.ToString()),
-                                                              (object sender, SqlInfoMessageEventArgs e) => mBackgroundWorker.ReportProgress(0, e.Message));
+                                                              query.Query,
+                                                              query.Parameters,
+                                                              (object sender, ServerMessageEventArgs e) => mBackgroundWorker.ReportProgress(e.Error.ToString()),
+                                                              (object sender, SqlInfoMessageEventArgs e) => mBackgroundWorker.ReportProgress(e.Message));
 
                     while (!execution.IsCompleted)
                     {
@@ -143,7 +145,7 @@ namespace DatabaseHelper
                         }
                     }
 
-                    mBackgroundWorker.ReportProgress(0, (Guid.NewGuid(), "Query completed", execution.Result));
+                    mBackgroundWorker.ReportProgress((Guid.NewGuid(), "Query completed", execution.Result));
                 }
             }
         }
@@ -198,7 +200,7 @@ namespace DatabaseHelper
             cmbTables.Visibility = Visibility.Collapsed;
             dgResults.Visibility = Visibility.Collapsed;
 
-            txtCommand.Text = SQLQueriesHelper.Join(Queries).SmartSQLFormat(Parameters);
+            txtCommand.Text = SQLQueriesHelper.JoinAndFormat(Queries);
         }
 
         private void StartExecution()

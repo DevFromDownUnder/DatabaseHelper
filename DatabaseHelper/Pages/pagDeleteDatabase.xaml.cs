@@ -1,5 +1,6 @@
 ﻿using DatabaseHelper.Extensions;
 using DatabaseHelper.Helpers;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,21 +21,23 @@ namespace DatabaseHelper.Pages
         {
             FormHelper.ExceptionDialogHandler(() =>
             {
-                if (dgDatabases.SelectedItem != null)
+                if (dgDatabases.ItemsSource != null)
                 {
-                    if (dgDatabases.SelectedItem is System.Data.DataRowView row)
+                    if (dgDatabases.ItemsSource is System.Data.DataRowView[] rows)
                     {
-                        var databaseName = row["DatabaseName"].ToString();
+                        var databases = rows?.Where((row) => row["Select"] is bool selected && selected)?.Select((row) => row["DatabaseName"].ToString())?.ToArray();
 
-                        var (query, parameters) = SQLQueriesHelper.GetDeleteDatabase(databaseName);
+                        if (databases != null)
+                        {
+                            var queries = SQLQueriesHelper.GetDeleteDatabases(databases);
 
-                        ComandProcessor processor = FormHelper.GetNewCommandProcessor();
-                        processor.KillExistingConnections = true;
-                        processor.DatabaseToKill = databaseName;
-                        processor.Queries = new[] { query };
-                        processor.Parameters = parameters;
+                            ComandProcessor processor = FormHelper.GetNewCommandProcessor();
+                            processor.KillExistingConnections = true;
+                            processor.DatabasesToKill = databases;
+                            processor.Queries = queries;
 
-                        processor.ShowDialog();
+                            processor.ShowDialog();
+                        }
                     }
                 }
             });
@@ -47,20 +50,11 @@ namespace DatabaseHelper.Pages
             );
         }
 
-        private void Page_Loaded(object sender, RoutedEventArgs e)
-        {
-            SetDefaults();
-        }
-
         private async Task Refresh()
         {
             var results = await SQLQueriesHelper.GetDatabases(SettingsHelper.GetSQLConnectionDetails());
 
             dgDatabases.ItemsSource = results?.Tables?.FirstOrDefault()?.AddSelectColumn()?.DefaultView;
-        }
-
-        private void SetDefaults()
-        {
         }
     }
 }

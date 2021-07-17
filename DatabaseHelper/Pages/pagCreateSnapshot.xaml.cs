@@ -25,21 +25,20 @@ namespace DatabaseHelper.Pages
             {
                 var database = txtSourceDatabase.Text.SafeTrim();
                 var databaseDataName = txtSourceDataname.Text.SafeTrim();
-                var snapshotName = txtSnapshotName.Text.SafeTrim();
+                var snapshot = txtSnapshotName.Text.SafeTrim();
                 var snapshotFilename = txtSnapshotDataFilename.Text.SafeTrim();
 
                 Requires.NotNullOrWhiteSpace(database, "Database must be selected");
                 Requires.NotNullOrWhiteSpace(databaseDataName, "Database must be selected");
-                Requires.NotNullOrWhiteSpace(snapshotName, "Snapshot name cannot be empty");
+                Requires.NotNullOrWhiteSpace(snapshot, "Snapshot name cannot be empty");
                 Requires.NotNullOrWhiteSpace(snapshotFilename, "Snapshot filename cannot be empty");
 
-                var (query, parameters) = SQLQueriesHelper.GetCreateSnapshot(database, databaseDataName, snapshotName, snapshotFilename);
+                var query = SQLQueriesHelper.GetCreateSnapshot(database, databaseDataName, snapshot, snapshotFilename);
 
                 ComandProcessor processor = FormHelper.GetNewCommandProcessor();
                 processor.KillExistingConnections = false;
-                processor.DatabaseToKill = database;
+                processor.DatabasesToKill = new[] { database };
                 processor.Queries = new[] { query };
-                processor.Parameters = parameters;
 
                 processor.ShowDialog();
             });
@@ -71,20 +70,11 @@ namespace DatabaseHelper.Pages
             }
         }
 
-        private void Page_Loaded(object sender, RoutedEventArgs e)
-        {
-            SetDefaults();
-        }
-
         private async Task Refresh()
         {
             var results = await SQLQueriesHelper.GetDatabases(SettingsHelper.GetSQLConnectionDetails());
 
             dgDatabases.ItemsSource = results?.Tables?.FirstOrDefault()?.DefaultView;
-        }
-
-        private void SetDefaults()
-        {
         }
 
         private void UpdateSnapshotNames()

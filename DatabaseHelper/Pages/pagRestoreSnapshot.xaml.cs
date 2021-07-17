@@ -24,16 +24,15 @@ namespace DatabaseHelper.Pages
                 {
                     if (dgDatabases.SelectedItem is System.Data.DataRowView row)
                     {
-                        var snapshotName = row["SnapshotName"].ToString();
-                        var databaseName = row["DatabaseName"].ToString();
+                        var snapshot = row["SnapshotName"].ToString();
+                        var database = row["DatabaseName"].ToString();
 
-                        var (query, parameters) = SQLQueriesHelper.GetRestoreSnapshot(snapshotName, databaseName);
+                        var query = SQLQueriesHelper.GetRestoreSnapshot(snapshot, database);
 
                         ComandProcessor processor = FormHelper.GetNewCommandProcessor();
                         processor.KillExistingConnections = true;
-                        processor.DatabaseToKill = databaseName;
+                        processor.DatabasesToKill = new[] { database };
                         processor.Queries = new[] { query };
-                        processor.Parameters = parameters;
 
                         processor.ShowDialog();
                     }
@@ -48,20 +47,11 @@ namespace DatabaseHelper.Pages
             );
         }
 
-        private void Page_Loaded(object sender, RoutedEventArgs e)
-        {
-            SetDefaults();
-        }
-
         private async Task Refresh()
         {
             var results = await SQLQueriesHelper.GetSnapshots(SettingsHelper.GetSQLConnectionDetails());
 
             dgDatabases.ItemsSource = results?.Tables?.FirstOrDefault()?.AddSelectColumn()?.DefaultView;
-        }
-
-        private void SetDefaults()
-        {
         }
     }
 }

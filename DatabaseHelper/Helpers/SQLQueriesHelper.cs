@@ -1,9 +1,11 @@
 ﻿using DatabaseHelper.Contracts;
+using DatabaseHelper.Extensions;
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
 using System;
 using System.Data;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -26,7 +28,7 @@ namespace DatabaseHelper.Helpers
         private const string KILL_EXISTING_CONNECTIONS = "SQL\\KillExistingConnections.sql";
         private const string RESTORE_SNAPSHOTS = "SQL\\RestoreSnapshot.sql";
 
-        public static (string, SqlParameterCollection) GetBackupDatabase(string databaseName, string backupFilename, bool copyOnly, bool compression)
+        public static SQLQuery GetBackupDatabase(string database, string backupFilename, bool copyOnly, bool compression)
         {
             var queryFile = BACKUP_DATABASE;
 
@@ -46,23 +48,23 @@ namespace DatabaseHelper.Helpers
             var query = File.ReadAllText(queryFile);
 
             var parameters = new SqlCommand().Parameters;
-            parameters.AddWithValue("@DatabaseName", databaseName);
+            parameters.AddWithValue("@DatabaseName", database);
             parameters.AddWithValue("@BackupFilename", backupFilename);
 
-            return (query, parameters);
+            return new() { Query = query, Parameters = parameters };
         }
 
-        public static (string, SqlParameterCollection) GetCreateSnapshot(string databaseName, string databaseDataName, string snapshotName, string snapshotFilename)
+        public static SQLQuery GetCreateSnapshot(string database, string databaseDataName, string snapshot, string snapshotFilename)
         {
             var query = File.ReadAllText(CREATE_SNAPSHOT);
 
             var parameters = new SqlCommand().Parameters;
-            parameters.AddWithValue("@DatabaseName", databaseName);
-            parameters.AddWithValue("@SnapshotName", snapshotName);
+            parameters.AddWithValue("@DatabaseName", database);
+            parameters.AddWithValue("@SnapshotName", snapshot);
             parameters.AddWithValue("@DatabaseDataName", databaseDataName);
             parameters.AddWithValue("@SnapshotFilename", snapshotFilename);
 
-            return (query, parameters);
+            return new() { Query = query, Parameters = parameters };
         }
 
         public static async Task<DataSet> GetDatabases(SQLConnectionDetails connectionDetails,
@@ -80,35 +82,45 @@ namespace DatabaseHelper.Helpers
                                               fncInfoMessage);
         }
 
-        public static (string, SqlParameterCollection) GetDeleteDatabase(string databaseName)
+        public static SQLQuery GetDeleteDatabase(string database)
         {
             var query = File.ReadAllText(DELETE_DATABASE);
 
             var parameters = new SqlCommand().Parameters;
-            parameters.AddWithValue("@DatabaseName", databaseName);
+            parameters.AddWithValue("@DatabaseName", database);
 
-            return (query, parameters);
+            return new() { Query = query, Parameters = parameters };
         }
 
-        public static (string, SqlParameterCollection) GetDeleteSnapshot(string snapshotName)
+        public static SQLQuery[] GetDeleteDatabases(string[] databases)
+        {
+            return databases.Select((database) => GetDeleteDatabase(database)).ToArray();
+        }
+
+        public static SQLQuery GetDeleteSnapshot(string snapshot)
         {
             var query = File.ReadAllText(DELETE_SNAPSHOT);
 
             var parameters = new SqlCommand().Parameters;
-            parameters.AddWithValue("@SnapshotName", snapshotName);
+            parameters.AddWithValue("@SnapshotName", snapshot);
 
-            return (query, parameters);
+            return new() { Query = query, Parameters = parameters };
         }
 
-        public static (string, SqlParameterCollection) GetRestoreSnapshot(string snapshotName, string databaseName)
+        public static SQLQuery[] GetDeleteSnapshots(string[] snapshots)
+        {
+            return snapshots.Select((snapshot) => GetDeleteSnapshot(snapshot)).ToArray();
+        }
+
+        public static SQLQuery GetRestoreSnapshot(string snapshot, string database)
         {
             var query = File.ReadAllText(RESTORE_SNAPSHOTS);
 
             var parameters = new SqlCommand().Parameters;
-            parameters.AddWithValue("@DatabaseName", databaseName);
-            parameters.AddWithValue("@SnapshotName", snapshotName);
+            parameters.AddWithValue("@DatabaseName", database);
+            parameters.AddWithValue("@SnapshotName", snapshot);
 
-            return (query, parameters);
+            return new() { Query = query, Parameters = parameters };
         }
 
         public static async Task<DataSet> GetSnapshots(SQLConnectionDetails connectionDetails,
@@ -126,18 +138,18 @@ namespace DatabaseHelper.Helpers
                                               fncInfoMessage);
         }
 
-        public static string Join(string[] queries)
+        public static string JoinAndFormat(SQLQuery[] queries)
         {
             if (queries is null)
             {
                 return string.Empty;
             }
 
-            return string.Join($"{Environment.NewLine}GO {Environment.NewLine}", queries);
+            return string.Join($"{Environment.NewLine}GO {Environment.NewLine}", queries.Select((query) => query.Query.SmartSQLFormat(query.Parameters)));
         }
 
         public static async Task<DataSet> KillExistingConnections(SQLConnectionDetails connectionDetails,
-                                                                          string databaseName,
+                                                                  string database,
                                                                   ServerMessageEventHandler fncServerMessage = null,
                                                                   SqlInfoMessageEventHandler fncInfoMessage = null)
         {
@@ -146,7 +158,7 @@ namespace DatabaseHelper.Helpers
             var query = File.ReadAllText(KILL_EXISTING_CONNECTIONS);
 
             var parameters = new SqlCommand().Parameters;
-            parameters.AddWithValue("@DatabaseName", databaseName);
+            parameters.AddWithValue("@DatabaseName", database);
 
             return await SQLHelper.RunSmartCommand(connectionString,
                                                    query,

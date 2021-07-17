@@ -31,13 +31,12 @@ namespace DatabaseHelper.Pages
                 Requires.NotNullOrWhiteSpace(database, "Database must be selected");
                 Requires.NotNullOrWhiteSpace(backupFilename, "Backup filename cannot be empty");
 
-                var (query, parameters) = SQLQueriesHelper.GetBackupDatabase(database, backupFilename, copyOnly, compress);
+                var query = SQLQueriesHelper.GetBackupDatabase(database, backupFilename, copyOnly, compress);
 
                 ComandProcessor processor = FormHelper.GetNewCommandProcessor();
                 processor.KillExistingConnections = false;
-                processor.DatabaseToKill = database;
+                processor.DatabasesToKill = new[] { database };
                 processor.Queries = new[] { query };
-                processor.Parameters = parameters;
 
                 processor.ShowDialog();
             });

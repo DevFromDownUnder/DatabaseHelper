@@ -12,7 +12,7 @@ namespace DatabaseHelper.Helpers
     public class SettingsHelper
     {
         public const string DEFAULT_SETTINGS_PATH = "settings.json";
-        private static UserSettings settings = GetDefaultSettings();
+        private static readonly UserSettings settings = GetDefaultSettings();
 
         public static UserSettings Settings { get => settings; }
 
