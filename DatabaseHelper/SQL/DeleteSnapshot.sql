@@ -1,1 +1,1 @@
-﻿DROP DATABASE [{@DatabaseName}]; 
+﻿DROP DATABASE [{@SnapshotName}]; 

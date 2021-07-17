@@ -7,17 +7,17 @@ namespace DatabaseHelper.Helpers
     public class MenuHelper
     {
         public static MenuItem[] MenuItems { get; set; } = {
-            new MenuItem {PagePath="\\Pages\\pagBackupDatabase.xaml", Icon="DatabaseExport", Title="Backup Database"},
-            new MenuItem {PagePath="\\Pages\\pagRestoreDatabase.xaml", Icon="DatabaseImport", Title="Restore Database"},
-            new MenuItem {PagePath="\\Pages\\pagDeleteDatabase.xaml", Icon="DatabaseRemove", Title="Delete Database"},
-            new MenuItem {PagePath="\\Pages\\pagCreateSnapshot.xaml", Icon="DatabasePlus", Title="Create Snapshot"},
-            new MenuItem {PagePath="\\Pages\\pagRestoreSnapshot.xaml", Icon="DatabaseRefresh", Title="Restore Snapshot"},
-            new MenuItem {PagePath="\\Pages\\pagDeleteSnapshot.xaml", Icon="DatabaseMinus", Title="Delete Snapshot"},
-            new MenuItem {PagePath="\\Pages\\pagExecuteFile.xaml", Icon="FileAlert", Title="Execute File"},
-            new MenuItem {PagePath="\\Pages\\pagExecuteSavedFiles.xaml", Icon="FileReplace", Title="Execute Saved Files"},
-            new MenuItem {PagePath="\\Pages\\pagExecuteQuery.xaml", Icon="Script", Title="Execute Query"},
-            new MenuItem {PagePath="\\Pages\\pagExecuteSavedQueries.xaml", Icon="ScriptText", Title="Execute Saved Queries"},
-            new MenuItem {PagePath="\\Pages\\pagSettings.xaml", Icon="Settings", Title="Settings"}
+            new MenuItem {PageKey="pagBackupDatabase", Content=new Pages.pagBackupDatabase(), Icon="DatabaseExport", Title="Backup Database"},
+            new MenuItem {PageKey="pagRestoreDatabase", Content=new Pages.pagRestoreDatabase(), Icon="DatabaseImport", Title="Restore Database"},
+            new MenuItem {PageKey="pagDeleteDatabase", Content=new Pages.pagDeleteDatabase(), Icon="DatabaseRemove", Title="Delete Database"},
+            new MenuItem {PageKey="pagCreateSnapshot", Content=new Pages.pagCreateSnapshot(), Icon="DatabasePlus", Title="Create Snapshot"},
+            new MenuItem {PageKey="pagRestoreSnapshot", Content=new Pages.pagRestoreSnapshot(), Icon="DatabaseRefresh", Title="Restore Snapshot"},
+            new MenuItem {PageKey="pagDeleteSnapshot", Content=new Pages.pagDeleteSnapshot(), Icon="DatabaseMinus", Title="Delete Snapshot"},
+            new MenuItem {PageKey="pagExecuteFile", Content=new Pages.pagExecuteFile(), Icon="FileAlert", Title="Execute File"},
+            new MenuItem {PageKey="pagExecuteSavedFiles", Content=new Pages.pagExecuteSavedFiles(), Icon="FileReplace", Title="Execute Saved Files"},
+            new MenuItem {PageKey="pagExecuteQuery", Content=new Pages.pagExecuteQuery(), Icon="Script", Title="Execute Query"},
+            new MenuItem {PageKey="pagExecuteSavedQueries", Content=new Pages.pagExecuteSavedQueries(), Icon="ScriptText", Title="Execute Saved Queries"},
+            new MenuItem {PageKey="pagSettings", Content=new Pages.pagSettings(), Icon="Settings", Title="Settings"}
         };
     }
 }

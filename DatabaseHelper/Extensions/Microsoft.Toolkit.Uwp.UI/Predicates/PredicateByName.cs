@@ -14,14 +14,14 @@ namespace Microsoft.Toolkit.Uwp.UI.Predicates
     internal readonly struct PredicateByName : IPredicate<FrameworkElement>
     {
         /// <summary>
-        /// The name of the element to look for.
-        /// </summary>
-        private readonly string name;
-
-        /// <summary>
         /// The comparison type to use to match <see name="name"/>.
         /// </summary>
         private readonly StringComparison comparisonType;
+
+        /// <summary>
+        /// The name of the element to look for.
+        /// </summary>
+        private readonly string name;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PredicateByName"/> struct.

@@ -10,16 +10,16 @@ namespace DatabaseHelper.Helpers
     {
         public static Browser Instance { get; set; } = new Browser();
 
-        public static async Task<List<SQLServer>> GetRegisteredNetworkServers()
+        public static async Task<List<SQLServer>> GetRegisteredLocalServers()
         {
-            var servers = await Instance.DiscoverNetworkServers(new()).ConfigureAwait(false);
+            var servers = await Instance.DiscoverLocalServers(new()).ConfigureAwait(false);
 
             return servers?.Select((s) => new SQLServer() { Server = s.ServerName, Port = s.Port })?.ToList();
         }
 
-        public static async Task<List<SQLServer>> GetRegisteredLocalServers()
+        public static async Task<List<SQLServer>> GetRegisteredNetworkServers()
         {
-            var servers = await Instance.DiscoverLocalServers(new()).ConfigureAwait(false);
+            var servers = await Instance.DiscoverNetworkServers(new()).ConfigureAwait(false);
 
             return servers?.Select((s) => new SQLServer() { Server = s.ServerName, Port = s.Port })?.ToList();
         }

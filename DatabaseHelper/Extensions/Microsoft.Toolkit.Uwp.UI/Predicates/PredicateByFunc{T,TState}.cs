@@ -16,14 +16,14 @@ namespace Microsoft.Toolkit.Uwp.UI.Predicates
         where T : class
     {
         /// <summary>
-        /// The state to give as input to <see name="predicate"/>.
-        /// </summary>
-        private readonly TState state;
-
-        /// <summary>
         /// The predicatee to use to match items.
         /// </summary>
         private readonly Func<T, TState, bool> predicate;
+
+        /// <summary>
+        /// The state to give as input to <see name="predicate"/>.
+        /// </summary>
+        private readonly TState state;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PredicateByFunc{T, TState}"/> struct.

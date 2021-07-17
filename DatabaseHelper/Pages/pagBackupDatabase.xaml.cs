@@ -1,5 +1,8 @@
 ﻿using DatabaseHelper.Extensions;
 using DatabaseHelper.Helpers;
+using Microsoft;
+using System;
+using System.Data;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,9 +19,66 @@ namespace DatabaseHelper.Pages
             InitializeComponent();
         }
 
+        private void btnExecute_Click(object sender, RoutedEventArgs e)
+        {
+            FormHelper.ExceptionDialogHandler(() =>
+            {
+                var database = txtSourceDatabase.Text.SafeTrim();
+                var backupFilename = txtBackupDataFilename.Text.SafeTrim();
+                var compress = chkCompress.IsChecked ?? false;
+                var copyOnly = chkCopyOnlyBackup.IsChecked ?? false;
+
+                Requires.NotNullOrWhiteSpace(database, "Database must be selected");
+                Requires.NotNullOrWhiteSpace(backupFilename, "Backup filename cannot be empty");
+
+                var (query, parameters) = SQLQueriesHelper.GetBackupDatabase(database, backupFilename, copyOnly, compress);
+
+                ComandProcessor processor = FormHelper.GetNewCommandProcessor();
+                processor.KillExistingConnections = false;
+                processor.DatabaseToKill = database;
+                processor.Queries = new[] { query };
+                processor.Parameters = parameters;
+
+                processor.ShowDialog();
+            });
+        }
+
+        private async void btnRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            await FormHelper.ExceptionDialogHandlerAsync(
+                FormHelper.LoadingFlatDarkBgButton(Refresh(), (Button)sender)
+            );
+        }
+
+        private void chkAddTimestamp_CheckChanged(object sender, RoutedEventArgs e)
+        {
+            if (dgDatabases.SelectedItem is DataRowView)
+            {
+                UpdateBackupNames();
+            }
+        }
+
+        private void dgDatabases_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (dgDatabases.SelectedItem is DataRowView row)
+            {
+                txtSourceDatabase.Text = row.Row.Field<string>("DatabaseName") ?? string.Empty;
+                txtSourceDataname.Text = row.Row.Field<string>("DatabaseDataName") ?? string.Empty;
+
+                UpdateBackupNames();
+            }
+        }
+
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             SetDefaults();
+        }
+
+        private async Task Refresh()
+        {
+            var results = await SQLQueriesHelper.GetDatabases(SettingsHelper.GetSQLConnectionDetails());
+
+            dgDatabases.ItemsSource = results?.Tables?.FirstOrDefault()?.AddSelectColumn()?.DefaultView;
         }
 
         private void SetDefaults()
@@ -27,24 +87,15 @@ namespace DatabaseHelper.Pages
             chkCompress.IsChecked = true;
         }
 
-        private async Task Refresh()
+        private void UpdateBackupNames()
         {
-            var results = await SQLQueriesHelper.GetDatabases(SettingsHelper.GetSQLConnectionDetails());
+            string folder = txtBackupFolder.Text.SafeTrim().AddTrailingDirectorySeparator();
+            string database = txtSourceDatabase.Text.SafeTrim();
+            string timestamp = (chkAddTimestamp.IsChecked ?? false) ? DateTime.Now.ToString("_yyyyMMdd_HHmmss") : string.Empty;
+            string extension = ".bak";
 
-            dgDatabases.ItemsSource = results?.Tables?.FirstOrDefault()?.DefaultView;
-        }
-
-        private async void btnRefresh_Click(object sender, RoutedEventArgs e)
-        {
-            await FormHelper.ExceptionDialogHandler(
-                FormHelper.LoadingFlatDarkBgButton(Refresh(), (Button)sender)
-            );
-        }
-
-        private void btnExecute_Click(object sender, RoutedEventArgs e)
-        {
-            ComandProcessor processor = FormHelper.GetNewCommandProcessor(null);
-            processor.ShowDialog();
+            txtBackupName.Text = $"{database}{timestamp}";
+            txtBackupDataFilename.Text = $"{folder}{database}{timestamp}{extension}";
         }
     }
 }

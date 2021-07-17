@@ -80,8 +80,7 @@
                          Text="{Binding ConnectionDetails.Password}" />
                 <Separator />
                 <StackPanel Orientation="Horizontal">
-                    <RadioButton x:Name="sqlsec"
-                                 GroupName="SQLSecurityType"
+                    <RadioButton GroupName="SQLSecurityType"
                                  IsChecked="{Binding ConnectionDetails.UseSQLPassword}"
                                  Style="{DynamicResource MaterialDesignChoiceChipPrimaryOutlineRadioButton}"
                                  ToolTip="SQL user">
@@ -121,12 +120,31 @@
                              materialDesign:HintAssist.Hint="Output"
                              IsReadOnly="True"
                              Style="{DynamicResource MaterialDesignFloatingHintTextBox}" />
-                    <ComboBox Name="cmbResultSet"
-                              HorizontalAlignment="Stretch"
-                              materialDesign:HintAssist.Hint="Result set"
-                              IsReadOnly="True"
-                              SelectionChanged="cmbResultSet_SelectionChanged"
-                              Style="{DynamicResource MaterialDesignFilledComboBox}" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <ComboBox Name="cmbResultSet"
+                                  Grid.Row="0"
+                                  Grid.Column="0"
+                                  HorizontalAlignment="Stretch"
+                                  materialDesign:HintAssist.Hint="Result set"
+                                  DisplayMemberPath="Key"
+                                  IsReadOnly="True"
+                                  ItemsSource="{Binding Results}"
+                                  SelectionChanged="cmbResultSet_SelectionChanged"
+                                  Style="{DynamicResource MaterialDesignFilledComboBox}" />
+                        <ComboBox Name="cmbTables"
+                                  Grid.Row="0"
+                                  Grid.Column="1"
+                                  HorizontalAlignment="Stretch"
+                                  materialDesign:HintAssist.Hint="Tables"
+                                  IsReadOnly="True"
+                                  IsSynchronizedWithCurrentItem="True"
+                                  SelectionChanged="cmbTables_SelectionChanged"
+                                  Style="{DynamicResource MaterialDesignFilledComboBox}" />
+                    </Grid>
                     <DataGrid Name="dgResults"
                               HorizontalAlignment="Stretch"
                               AutoGenerateColumns="True"
@@ -153,13 +171,13 @@
                     <ListBox Name="lsbConnections" Style="{DynamicResource MaterialDesignToolToggleListBox}">
                         <ListBoxItem x:Name="lbiLeaveConnections"
                                      Padding="10,2,10,2"
-                                     Selector.IsSelected="True"
                                      Style="{DynamicResource MaterialDesignToolToggleListBoxItem}"
                                      ToolTip="Leave existing connections">
                             <materialDesign:PackIcon Foreground="LimeGreen" Kind="LanCheck" />
                         </ListBoxItem>
                         <ListBoxItem x:Name="lbiKillConnections"
                                      Padding="10,2,10,2"
+                                     Selector.IsSelected="{Binding KillExistingConnections}"
                                      Style="{DynamicResource MaterialDesignToolToggleListBoxItem}"
                                      ToolTip="Kill existing connections">
                             <materialDesign:PackIcon Foreground="Red" Kind="LanDisconnect" />

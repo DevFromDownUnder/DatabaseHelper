@@ -12,70 +12,15 @@ namespace DatabaseHelper.Helpers
     {
         public const string MASTER_DB = "master";
 
-        public static async Task<DataSet> RunSmartCommand(string connectionString,
-                                                          string command,
-                                                          SqlParameterCollection parameters,
-                                                          ServerMessageEventHandler fncServerMessage)
-        {
-            return await Task.Run(() =>
-            {
-                DataSet results = null;
-
-                using (SqlConnection connection = new(connectionString))
-                {
-                    var server = new Server(new ServerConnection(connection));
-
-                    server.ConnectionContext.ServerMessage += fncServerMessage;
-
-                    results = server.ConnectionContext.ExecuteWithResults(command.SmartSQLFormat(parameters));
-                }
-
-                return results;
-            });
-        }
-
-        public static async Task<DataSet> RunCommand(string connectionString,
-                                                     string command,
-                                                     SqlParameterCollection parameters,
-                                                     ServerMessageEventHandler fncServerMessage)
-        {
-            return await Task.Run(() =>
-            {
-                DataSet results = null;
-
-                using (SqlConnection connection = new(connectionString))
-                {
-                    var server = new Server(new ServerConnection(connection));
-
-                    server.ConnectionContext.ServerMessage += fncServerMessage;
-
-                    //Handle paramaters normally not weird embedded stuff I have going
-                    results = server.ConnectionContext.ExecuteWithResults(command.SmartSQLFormat(parameters));
-                }
-
-                return results;
-            });
-        }
-
-        public static string GetDomainUsername(string domain, string username)
-        {
-            if (domain.HasValue())
-            {
-                return username.Trim() + '@' + username.Trim();
-            }
-            else
-            {
-                return username.Trim();
-            }
-        }
-
         public static string GetConnectionString(SQLConnectionDetails connectionDetails, bool useMasterOverride = false)
         {
             var connectionBuilder = new SqlConnectionStringBuilder()
             {
                 ApplicationName = System.AppDomain.CurrentDomain.FriendlyName,
                 DataSource = connectionDetails.Server,
-                InitialCatalog = useMasterOverride ? MASTER_DB : connectionDetails.Database
+                InitialCatalog = useMasterOverride ? MASTER_DB : connectionDetails.Database,
+                ConnectTimeout = connectionDetails.ConnectTimeout,
+                CommandTimeout = connectionDetails.CommandTimeout
             };
 
             if (connectionDetails.UseActiveDirectory)
@@ -99,6 +44,81 @@ namespace DatabaseHelper.Helpers
             }
 
             return connectionBuilder.ToString();
+        }
+
+        public static string GetDomainUsername(string domain, string username)
+        {
+            if (domain.HasValue())
+            {
+                return username.Trim() + '@' + username.Trim();
+            }
+            else
+            {
+                return username.Trim();
+            }
+        }
+
+        public static async Task<DataSet> RunCommand(string connectionString,
+                                                     string command,
+                                                     SqlParameterCollection parameters,
+                                                     ServerMessageEventHandler fncServerMessage,
+                                                     SqlInfoMessageEventHandler fncInfoMessage)
+        {
+            return await Task.Run(() =>
+            {
+                DataSet results = null;
+
+                using (SqlConnection connection = new(connectionString))
+                {
+                    var server = new Server(new ServerConnection(connection));
+
+                    if (fncServerMessage != null)
+                    {
+                        server.ConnectionContext.ServerMessage += fncServerMessage;
+                    }
+
+                    if (fncInfoMessage != null)
+                    {
+                        server.ConnectionContext.InfoMessage += fncInfoMessage;
+                    }
+
+                    //Handle paramaters normally not weird embedded stuff I have going
+                    results = server.ConnectionContext.ExecuteWithResults(command.SmartSQLFormat(parameters));
+                }
+
+                return results;
+            });
+        }
+
+        public static async Task<DataSet> RunSmartCommand(string connectionString,
+                                                                                  string command,
+                                                          SqlParameterCollection parameters,
+                                                          ServerMessageEventHandler fncServerMessage,
+                                                          SqlInfoMessageEventHandler fncInfoMessage)
+        {
+            return await Task.Run(() =>
+            {
+                DataSet results = null;
+
+                using (SqlConnection connection = new(connectionString))
+                {
+                    var server = new Server(new ServerConnection(connection));
+
+                    if (fncServerMessage != null)
+                    {
+                        server.ConnectionContext.ServerMessage += fncServerMessage;
+                    }
+
+                    if (fncInfoMessage != null)
+                    {
+                        server.ConnectionContext.InfoMessage += fncInfoMessage;
+                    }
+
+                    results = server.ConnectionContext.ExecuteWithResults(command.SmartSQLFormat(parameters));
+                }
+
+                return results;
+            });
         }
     }
 }

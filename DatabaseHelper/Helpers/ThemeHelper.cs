@@ -5,6 +5,36 @@ namespace DatabaseHelper.Helpers
 {
     internal class ThemeHelper
     {
+        public static System.Windows.Media.Color DefaultBackgroundColor
+        {
+            get
+            {
+                if (SettingsHelper.Settings.Theme_IsDarkTheme)
+                {
+                    return Theme.Dark.MaterialDesignToolBackground;
+                }
+                else
+                {
+                    return Theme.Light.MaterialDesignToolBackground;
+                }
+            }
+        }
+
+        public static System.Windows.Media.Color DefaultForegroundColor
+        {
+            get
+            {
+                if (SettingsHelper.Settings.Theme_IsDarkTheme)
+                {
+                    return Theme.Dark.MaterialDesignToolForeground;
+                }
+                else
+                {
+                    return Theme.Light.MaterialDesignToolForeground;
+                }
+            }
+        }
+
         public static void BindTheme() => BindTheme(SettingsHelper.Settings);
 
         public static void BindTheme(UserSettings settings)
@@ -14,28 +44,6 @@ namespace DatabaseHelper.Helpers
                 settings.Theme_IsDarkTheme_Changed += ChangeTheme;
                 settings.Theme_PrimaryColor_Changed += ChangePrimaryColor;
                 settings.Theme_SecondaryColor_Changed += ChangeSecondaryColor;
-            }
-        }
-
-        public static void UnBindTheme() => UnBindTheme(SettingsHelper.Settings);
-
-        public static void UnBindTheme(UserSettings settings)
-        {
-            if (settings != null)
-            {
-                settings.Theme_IsDarkTheme_Changed -= ChangeTheme;
-                settings.Theme_PrimaryColor_Changed -= ChangePrimaryColor;
-                settings.Theme_SecondaryColor_Changed -= ChangeSecondaryColor;
-            }
-        }
-
-        public static void RefreshTheme()
-        {
-            if (SettingsHelper.Settings != null)
-            {
-                ChangeTheme(null, SettingsHelper.Settings.Theme_IsDarkTheme);
-                ChangePrimaryColor(null, SettingsHelper.Settings.Theme_PrimaryColor);
-                ChangeSecondaryColor(null, SettingsHelper.Settings.Theme_SecondaryColor);
             }
         }
 
@@ -100,6 +108,28 @@ namespace DatabaseHelper.Helpers
             }
 
             paletteExt.SetTheme(themeExt);
+        }
+
+        public static void RefreshTheme()
+        {
+            if (SettingsHelper.Settings != null)
+            {
+                ChangeTheme(null, SettingsHelper.Settings.Theme_IsDarkTheme);
+                ChangePrimaryColor(null, SettingsHelper.Settings.Theme_PrimaryColor);
+                ChangeSecondaryColor(null, SettingsHelper.Settings.Theme_SecondaryColor);
+            }
+        }
+
+        public static void UnBindTheme() => UnBindTheme(SettingsHelper.Settings);
+
+        public static void UnBindTheme(UserSettings settings)
+        {
+            if (settings != null)
+            {
+                settings.Theme_IsDarkTheme_Changed -= ChangeTheme;
+                settings.Theme_PrimaryColor_Changed -= ChangePrimaryColor;
+                settings.Theme_SecondaryColor_Changed -= ChangeSecondaryColor;
+            }
         }
     }
 }

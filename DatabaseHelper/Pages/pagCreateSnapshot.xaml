@@ -2,6 +2,7 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:helpers="clr-namespace:DatabaseHelper.Helpers"
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       Title="pagCreateSnapshot"
@@ -85,6 +86,7 @@
                       ColumnWidth="Auto"
                       HorizontalScrollBarVisibility="Auto"
                       IsReadOnly="True"
+                      SelectionChanged="dgDatabases_SelectionChanged"
                       SelectionMode="Single"
                       SelectionUnit="FullRow"
                       Style="{DynamicResource MaterialDesignDataGrid}"
@@ -94,8 +96,7 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <RadioButton HorizontalAlignment="Center"
-                                             GroupName="Select"
-                                             IsChecked="{Binding Select}"
+                                             IsChecked="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType=DataGridRow}}"
                                              Style="{DynamicResource MaterialDesignDarkRadioButton}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -119,15 +120,16 @@
                           Width="5"
                           HorizontalAlignment="Stretch" />
             <StackPanel Grid.Row="0" Grid.Column="2">
-                <TextBox Name="txtBackupFolder"
+                <TextBox Name="txtSnapshotFolder"
                          Margin="4"
                          materialDesign:HintAssist.Hint="Snapshot folder"
-                         Style="{DynamicResource MaterialDesignFloatingHintTextBox}" />
-                <TextBox Name="txtBackupName"
+                         Style="{DynamicResource MaterialDesignFloatingHintTextBox}"
+                         Text="{Binding Source={x:Static helpers:SettingsHelper.Settings}, Path=CreateSnapshot_SnapshotFolder}" />
+                <TextBox Name="txtSnapshotName"
                          Margin="4"
                          materialDesign:HintAssist.Hint="Snapshot name"
                          Style="{DynamicResource MaterialDesignFloatingHintTextBox}" />
-                <TextBox Name="txtBackupDataFilename"
+                <TextBox Name="txtSnapshotDataFilename"
                          Margin="4"
                          materialDesign:HintAssist.Hint="Snapshot data filename"
                          Style="{DynamicResource MaterialDesignFloatingHintTextBox}" />
@@ -141,6 +143,28 @@
                          materialDesign:HintAssist.Hint="Source data name"
                          IsEnabled="False"
                          Style="{DynamicResource MaterialDesignFloatingHintTextBox}" />
+                <Grid Margin="4,16,4,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               VerticalAlignment="Center"
+                               Style="{DynamicResource MaterialDesignTextBlock}"
+                               Text="Add timestamp" />
+                    <ToggleButton Name="chkAddTimestamp"
+                                  Grid.Column="1"
+                                  VerticalAlignment="Center"
+                                  Checked="chkAddTimestamp_CheckChanged"
+                                  IsChecked="{Binding Source={x:Static helpers:SettingsHelper.Settings}, Path=CreateSnapshot_AddTimestamp}"
+                                  Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                                  Unchecked="chkAddTimestamp_CheckChanged">
+                        <materialDesign:PackIcon Kind="TimerOffOutline" />
+                        <materialDesign:ToggleButtonAssist.OnContent>
+                            <materialDesign:PackIcon Kind="Timer" />
+                        </materialDesign:ToggleButtonAssist.OnContent>
+                    </ToggleButton>
+                </Grid>
             </StackPanel>
         </Grid>
     </Grid>

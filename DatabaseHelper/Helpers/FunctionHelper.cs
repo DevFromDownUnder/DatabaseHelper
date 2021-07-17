@@ -5,6 +5,15 @@ namespace DatabaseHelper.Helpers
 {
     public class FunctionHelper
     {
+        public static void ConsumeException(Action action)
+        {
+            try
+            {
+                action();
+            }
+            catch { }
+        }
+
         public static void DoNothing()
         {
         }
@@ -15,15 +24,6 @@ namespace DatabaseHelper.Helpers
             {
                 Thread.Sleep(1);
             }
-        }
-
-        public static void ConsumeException(Action action)
-        {
-            try
-            {
-                action();
-            }
-            catch { }
         }
     }
 }

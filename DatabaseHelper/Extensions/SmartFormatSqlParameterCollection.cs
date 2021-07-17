@@ -20,6 +20,7 @@ namespace DatabaseHelper.Extensions
             var selector = selectorInfo.SelectorText;
 
             if (current is SqlParameterCollection rawSqlParameterCollection)
+            {
                 foreach (SqlParameter parameter in rawSqlParameterCollection)
                 {
                     var key = parameter.ParameterName;
@@ -29,8 +30,11 @@ namespace DatabaseHelper.Extensions
                         return true;
                     }
                 }
+            }
 
-            return false;
+            //Will output straight placeholder name instead of erroring
+            selectorInfo.Result = selector;
+            return true;
         }
     }
 }

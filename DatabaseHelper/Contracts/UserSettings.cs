@@ -11,10 +11,9 @@ namespace DatabaseHelper.Contracts
     {
         #region Change Tracking
 
-        private ObservableCollection<SQLServer> server_Servers;
         private ConcurrentObservableDictionary<string, string> executeSavedFiles_Files;
         private ConcurrentObservableDictionary<string, string> executeSavedQueries_Queries;
-
+        private ObservableCollection<SQLServer> server_Servers;
         public bool IsChanged { get; set; }
 
         #endregion Change Tracking
@@ -45,7 +44,12 @@ namespace DatabaseHelper.Contracts
 
         #region Server Settings
 
+        public int Server_CommandTimeout { get; set; }
+        public int Server_ConnectTimeout { get; set; }
         public SQLServer Server_CurrentServer { get; set; }
+        public string Server_Domain { get; set; }
+        public string Server_Password { get; set; }
+        public SQLServer Server_PreferredServer { get; set; }
 
         public ObservableCollection<SQLServer> Server_Servers
         {
@@ -61,23 +65,21 @@ namespace DatabaseHelper.Contracts
             }
         }
 
-        public SQLServer Server_PreferredServer { get; set; }
-        public string Server_Domain { get; set; }
-        public string Server_Username { get; set; }
-        public string Server_Password { get; set; }
-        public bool Server_UseSQLPassword { get; set; }
         public bool Server_UseActiveDirectory { get; set; }
         public bool Server_UseIntegratedSecurity { get; set; }
+        public string Server_Username { get; set; }
+        public bool Server_UseSQLPassword { get; set; }
 
         #endregion Server Settings
 
         #region Backup Database Settings
 
+        public bool BackupDatabase_AddTimestamp { get; set; }
+        public string BackupDatabase_BackupDataFilenameFormat { get; set; }
         public string BackupDatabase_BackupFolder { get; set; }
         public string BackupDatabase_BackupNameFormat { get; set; }
-        public string BackupDatabase_BackupDataFilenameFormat { get; set; }
-        public bool BackupDatabase_CopyOnly { get; set; }
         public bool BackupDatabase_Compress { get; set; }
+        public bool BackupDatabase_CopyOnly { get; set; }
 
         #endregion Backup Database Settings
 
@@ -89,9 +91,10 @@ namespace DatabaseHelper.Contracts
 
         #region Create Snapshot Settings
 
+        public bool CreateSnapshot_AddTimestamp { get; set; }
+        public string CreateSnapshot_SnapshotDataFilenameFormat { get; set; }
         public string CreateSnapshot_SnapshotFolder { get; set; }
         public string CreateSnapshot_SnapshotNameFormat { get; set; }
-        public string CreateSnapshot_SnapshotDataFilenameFormat { get; set; }
 
         #endregion Create Snapshot Settings
 

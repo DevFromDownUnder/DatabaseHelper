@@ -1,5 +1,4 @@
 ﻿using MaterialDesignThemes.Wpf;
-using Microsoft.Data.SqlClient;
 using System;
 using System.Threading.Tasks;
 using System.Windows;
@@ -10,13 +9,25 @@ namespace DatabaseHelper.Helpers
 {
     public class FormHelper
     {
-        public const string DIALOG_ERROR = "ErrorHost";
-        public const string DIALOG_CAPTURE_STRECHED = "CaptureStrechedHost";
         public const string DIALOG_CAPTURE_CENTERED = "CaptureCenteredHost";
-        public const string DIALOG_CLICKAWAY_STRECHED = "ClickAwayStrechedHost";
+        public const string DIALOG_CAPTURE_STRECHED = "CaptureStrechedHost";
         public const string DIALOG_CLICKAWAY_CENTERED = "ClickAwayCenteredHost";
+        public const string DIALOG_CLICKAWAY_STRECHED = "ClickAwayStrechedHost";
+        public const string DIALOG_ERROR = "ErrorHost";
 
-        public static async Task ExceptionDialogHandler(Task action)
+        public static void ExceptionDialogHandler(Action action)
+        {
+            try
+            {
+                action();
+            }
+            catch (Exception e)
+            {
+                DialogHost.Show(e, DIALOG_ERROR);
+            }
+        }
+
+        public static async Task ExceptionDialogHandlerAsync(Task action)
         {
             try
             {
@@ -28,40 +39,30 @@ namespace DatabaseHelper.Helpers
             }
         }
 
+        public static async Task ExceptionDialogHandlerAsync(Action action)
+        {
+            try
+            {
+                await Task.Run(action);
+            }
+            catch (Exception e)
+            {
+                await DialogHost.Show(e, DIALOG_ERROR);
+            }
+        }
+
         #region Custom Open Dialog
 
-        public static RoutedCommand OpenCaptureStrechedCommand { get; } = new(DIALOG_CAPTURE_STRECHED, typeof(FormHelper));
         public static RoutedCommand OpenCaptureCenteredCommand { get; } = new(DIALOG_CAPTURE_CENTERED, typeof(FormHelper));
-        public static RoutedCommand OpenClickAwayStrechedCommand { get; } = new(DIALOG_CLICKAWAY_STRECHED, typeof(FormHelper));
+        public static RoutedCommand OpenCaptureStrechedCommand { get; } = new(DIALOG_CAPTURE_STRECHED, typeof(FormHelper));
         public static RoutedCommand OpenClickAwayCenteredCommand { get; } = new(DIALOG_CLICKAWAY_CENTERED, typeof(FormHelper));
+        public static RoutedCommand OpenClickAwayStrechedCommand { get; } = new(DIALOG_CLICKAWAY_STRECHED, typeof(FormHelper));
 
         #endregion Custom Open Dialog
 
-        public static async Task LoadingOriginalButton(Action action, Button button)
+        public static ComandProcessor GetNewCommandProcessor(string database = SQLHelper.MASTER_DB)
         {
-            await LoadingButton(Task.Run(action), button, button.Style);
-        }
-
-        public static async Task LoadingOriginalButton(Task action, Button button)
-        {
-            await LoadingButton(action, button, button.Style);
-        }
-
-        public static async Task LoadingFlatDarkBgButton(Action action, Button button)
-        {
-            await LoadingFlatDarkBgButton(Task.Run(action), button);
-        }
-
-        public static async Task LoadingFlatDarkBgButton(Task action, Button button)
-        {
-            var loadingStyle = (System.Windows.Style)button.FindResource("MaterialDesignFlatDarkBgButton");
-
-            if (loadingStyle == null)
-            {
-                loadingStyle = button.Style;
-            }
-
-            await LoadingButton(action, button, loadingStyle);
+            return new ComandProcessor(SettingsHelper.GetSQLConnectionDetails(database));
         }
 
         public static async Task LoadingButton(Task action, Button button, Style loadingStyle)
@@ -86,9 +87,31 @@ namespace DatabaseHelper.Helpers
             }
         }
 
-        public static ComandProcessor GetNewCommandProcessor(string database = SQLHelper.MASTER_DB)
+        public static async Task LoadingFlatDarkBgButton(Action action, Button button)
         {
-            return new ComandProcessor(SettingsHelper.GetSQLConnectionDetails(database));
+            await LoadingFlatDarkBgButton(Task.Run(action), button);
+        }
+
+        public static async Task LoadingFlatDarkBgButton(Task action, Button button)
+        {
+            var loadingStyle = (System.Windows.Style)button.FindResource("MaterialDesignFlatDarkBgButton");
+
+            if (loadingStyle == null)
+            {
+                loadingStyle = button.Style;
+            }
+
+            await LoadingButton(action, button, loadingStyle);
+        }
+
+        public static async Task LoadingOriginalButton(Action action, Button button)
+        {
+            await LoadingButton(Task.Run(action), button, button.Style);
+        }
+
+        public static async Task LoadingOriginalButton(Task action, Button button)
+        {
+            await LoadingButton(action, button, button.Style);
         }
     }
 }

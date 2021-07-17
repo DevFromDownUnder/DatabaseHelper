@@ -17,6 +17,7 @@
     <PackageReference Include="MaterialDesignThemes" Version="4.1.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="3.0.0" />
     <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="161.46367.54" />
+    <PackageReference Include="Microsoft.VisualStudio.Validation" Version="16.10.26" />
     <PackageReference Include="PropertyChanged.Fody" Version="3.4.0" />
     <PackageReference Include="SmartFormat.NET" Version="2.7.0" />
     <PackageReference Include="Swordfish.NET.CollectionsV3" Version="3.3.7" />
@@ -27,6 +28,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="SQL\BackupDatabase.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SQL\BackupDatabase_Compression.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SQL\BackupDatabase_CopyOnly.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SQL\BackupDatabase_CopyOnly_Compression.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SQL\CreateSnapshot.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

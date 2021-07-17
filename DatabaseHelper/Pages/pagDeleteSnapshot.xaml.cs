@@ -16,13 +16,40 @@ namespace DatabaseHelper.Pages
             InitializeComponent();
         }
 
+        private void btnExecute_Click(object sender, RoutedEventArgs e)
+        {
+            FormHelper.ExceptionDialogHandler(() =>
+            {
+                if (dgDatabases.SelectedItem != null)
+                {
+                    if (dgDatabases.SelectedItem is System.Data.DataRowView row)
+                    {
+                        var snapshotName = row["SnapshotName"].ToString();
+
+                        var (query, parameters) = SQLQueriesHelper.GetDeleteSnapshot(snapshotName);
+
+                        ComandProcessor processor = FormHelper.GetNewCommandProcessor();
+                        processor.KillExistingConnections = false;
+                        processor.DatabaseToKill = snapshotName;
+                        processor.Queries = new[] { query };
+                        processor.Parameters = parameters;
+
+                        processor.ShowDialog();
+                    }
+                }
+            });
+        }
+
+        private async void btnRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            await FormHelper.ExceptionDialogHandlerAsync(
+                FormHelper.LoadingFlatDarkBgButton(Refresh(), (Button)sender)
+            );
+        }
+
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             SetDefaults();
-        }
-
-        private void SetDefaults()
-        {
         }
 
         private async Task Refresh()
@@ -32,17 +59,8 @@ namespace DatabaseHelper.Pages
             dgDatabases.ItemsSource = results?.Tables?.FirstOrDefault()?.DefaultView;
         }
 
-        private async void btnRefresh_Click(object sender, RoutedEventArgs e)
+        private void SetDefaults()
         {
-            await FormHelper.ExceptionDialogHandler(
-                FormHelper.LoadingFlatDarkBgButton(Refresh(), (Button)sender)
-            );
-        }
-
-        private void btnExecute_Click(object sender, RoutedEventArgs e)
-        {
-            ComandProcessor processor = FormHelper.GetNewCommandProcessor("test");
-            processor.ShowDialog();
         }
     }
 }

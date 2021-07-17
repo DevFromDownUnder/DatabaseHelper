@@ -1,5 +1,4 @@
 ﻿SELECT 
-    CAST(0 AS BIT) AS   [Create], 
     OD.name AS          DatabaseName, 
     OD.database_id AS   DatabaseId, 
     OS.name AS          DatabaseDataName, 

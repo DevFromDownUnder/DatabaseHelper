@@ -81,27 +81,27 @@
                   Style="{DynamicResource MaterialDesignDataGrid}"
                   VerticalScrollBarVisibility="Auto">
             <DataGrid.Columns>
-                <DataGridCheckBoxColumn Binding="{Binding Select}"
-                                        EditingElementStyle="{DynamicResource MaterialDesignDataGridCheckBoxColumnEditingStyle}"
-                                        ElementStyle="{DynamicResource MaterialDesignDataGridCheckBoxColumnStyle}"
-                                        Header="Select"
-                                        IsReadOnly="False" />
+                <DataGridTemplateColumn Header="Select">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <RadioButton HorizontalAlignment="Center"
+                                         IsChecked="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType=DataGridRow}}"
+                                         Style="{DynamicResource MaterialDesignDarkRadioButton}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTextColumn Binding="{Binding SnapshotName}"
                                     EditingElementStyle="{DynamicResource MaterialDesignDataGridTextColumnEditingStyle}"
                                     ElementStyle="{DynamicResource MaterialDesignDataGridTextColumnStyle}"
                                     Header="Snapshot name" />
-                <DataGridTextColumn Binding="{Binding SnapshotFilename}"
-                                    EditingElementStyle="{DynamicResource MaterialDesignDataGridTextColumnEditingStyle}"
-                                    ElementStyle="{DynamicResource MaterialDesignDataGridTextColumnStyle}"
-                                    Header="Snapshot filename" />
                 <DataGridTextColumn Binding="{Binding DatabaseName}"
                                     EditingElementStyle="{DynamicResource MaterialDesignDataGridTextColumnEditingStyle}"
                                     ElementStyle="{DynamicResource MaterialDesignDataGridTextColumnStyle}"
                                     Header="Database name" />
-                <DataGridTextColumn Binding="{Binding DatabaseFilename}"
+                <DataGridTextColumn Binding="{Binding SnapshotFilename}"
                                     EditingElementStyle="{DynamicResource MaterialDesignDataGridTextColumnEditingStyle}"
                                     ElementStyle="{DynamicResource MaterialDesignDataGridTextColumnStyle}"
-                                    Header="Database filename" />
+                                    Header="Snapshot filename" />
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

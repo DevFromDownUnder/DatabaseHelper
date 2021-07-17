@@ -22,57 +22,6 @@ namespace DatabaseHelper.Pages
             InitializeComponent();
         }
 
-        private void Page_Loaded(object sender, RoutedEventArgs e)
-        {
-            SetDefaults();
-        }
-
-        private void SetDefaults()
-        {
-        }
-
-        private void hypRemove_Click(object sender, RoutedEventArgs e)
-        {
-            if (e.Source is Hyperlink item)
-            {
-                if (item.DataContext != null && SettingsHelper.Settings.Server_Servers.Any((x) => x.Server == item.DataContext.ToString()))
-                {
-                    SettingsHelper.Settings.Server_Servers.Remove(SettingsHelper.Settings.Server_Servers.First((x) => x.Server == item.DataContext.ToString()));
-                }
-            }
-        }
-
-        private async void btnAddRegisteredNetworkServers_Click(object sender, RoutedEventArgs e)
-        {
-            await FormHelper.LoadingOriginalButton(async () =>
-             {
-                 var servers = await SQLBrowserHelper.GetRegisteredNetworkServers();
-
-                 if (servers != null)
-                 {
-                     SettingsHelper.Settings.Server_Servers = SettingsHelper.Settings.Server_Servers.Union(servers).ToObservableCollection();
-                 }
-             }, (Button)sender);
-        }
-
-        private async void btnAddRegisteredLocalServers_Click(object sender, RoutedEventArgs e)
-        {
-            await FormHelper.LoadingOriginalButton(async () =>
-            {
-                var servers = await SQLBrowserHelper.GetRegisteredLocalServers();
-
-                if (servers != null)
-                {
-                    SettingsHelper.Settings.Server_Servers = SettingsHelper.Settings.Server_Servers.Union(servers).ToObservableCollection();
-                }
-            }, (Button)sender);
-        }
-
-        private void SecurtiyType_CheckChange(object sender, RoutedEventArgs e)
-        {
-            SettingsHelper.UpdateConnectionDetails(SettingsHelper.Settings);
-        }
-
         private async void AddServerDialog_Click(object sender, RoutedEventArgs e)
         {
             if (e.Source is Button btnSource)
@@ -91,7 +40,7 @@ namespace DatabaseHelper.Pages
                                 switch (btnSource.Tag.ToString())
                                 {
                                     case "Add":
-                                        await FormHelper.ExceptionDialogHandler(
+                                        await FormHelper.ExceptionDialogHandlerAsync(
                                             Task.Run(() =>
                                             {
                                                 if (server.HasNoValue())
@@ -139,6 +88,77 @@ namespace DatabaseHelper.Pages
             }
         }
 
+        private async void btnAddRegisteredLocalServers_Click(object sender, RoutedEventArgs e)
+        {
+            await FormHelper.LoadingOriginalButton(async () =>
+            {
+                var servers = await SQLBrowserHelper.GetRegisteredLocalServers();
+
+                if (servers != null)
+                {
+                    SettingsHelper.Settings.Server_Servers = SettingsHelper.Settings.Server_Servers.Union(servers).ToObservableCollection();
+                }
+            }, (Button)sender);
+        }
+
+        private async void btnAddRegisteredNetworkServers_Click(object sender, RoutedEventArgs e)
+        {
+            await FormHelper.LoadingOriginalButton(async () =>
+             {
+                 var servers = await SQLBrowserHelper.GetRegisteredNetworkServers();
+
+                 if (servers != null)
+                 {
+                     SettingsHelper.Settings.Server_Servers = SettingsHelper.Settings.Server_Servers.Union(servers).ToObservableCollection();
+                 }
+             }, (Button)sender);
+        }
+
+        private async void btnExport_Click(object sender, RoutedEventArgs e)
+        {
+            var saveFileDialog = new Microsoft.Win32.SaveFileDialog()
+            {
+                AddExtension = true,
+                DefaultExt = ".json",
+                InitialDirectory = System.IO.Directory.GetCurrentDirectory(),
+                Filter = "JSON files|*.json|All files|*.*"
+            };
+
+            if (saveFileDialog.ShowDialog() ?? false)
+            {
+                await FormHelper.ExceptionDialogHandlerAsync(
+                    SettingsHelper.SaveSettings(false, saveFileDialog.FileName)
+                );
+            }
+        }
+
+        private async void btnImport_Click(object sender, RoutedEventArgs e)
+        {
+            var saveFileDialog = new Microsoft.Win32.OpenFileDialog()
+            {
+                AddExtension = true,
+                InitialDirectory = System.IO.Directory.GetCurrentDirectory(),
+                Filter = "JSON files|*.json|All files|*.*"
+            };
+
+            if (saveFileDialog.ShowDialog() ?? false)
+            {
+                await FormHelper.ExceptionDialogHandlerAsync(
+                    SettingsHelper.LoadSettings(true, saveFileDialog.FileName)
+                );
+            }
+        }
+
+        private void btnResetToDefault_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsHelper.UpdateSettings(SettingsHelper.GetDefaultSettings());
+        }
+
+        private async void btnSave_Click(object sender, RoutedEventArgs e)
+        {
+            await SettingsHelper.SaveSettings();
+        }
+
         private async void EditJsonDialog_Click(object sender, RoutedEventArgs e)
         {
             if (e.Source is Button btnSource)
@@ -154,21 +174,21 @@ namespace DatabaseHelper.Pages
                             switch (btnSource.Tag.ToString())
                             {
                                 case "Save":
-                                    await FormHelper.ExceptionDialogHandler(
+                                    await FormHelper.ExceptionDialogHandlerAsync(
                                           FormHelper.LoadingFlatDarkBgButton(() => SettingsHelper.UpdateSettings(SettingsHelper.ParseUserSettingsJson(json)), btnSource)
                                     );
 
                                     break;
 
                                 case "Parse":
-                                    await FormHelper.ExceptionDialogHandler(
+                                    await FormHelper.ExceptionDialogHandlerAsync(
                                         FormHelper.LoadingFlatDarkBgButton(() => SettingsHelper.ParseUserSettingsJson(json), btnSource)
                                     );
 
                                     break;
 
                                 case "Format":
-                                    await FormHelper.ExceptionDialogHandler(
+                                    await FormHelper.ExceptionDialogHandlerAsync(
                                         FormHelper.LoadingFlatDarkBgButton(() => Dispatcher.Invoke(() => txtJson.Text = SettingsHelper.FormatUserSettingsJson(json)), btnSource)
                                     );
 
@@ -194,49 +214,29 @@ namespace DatabaseHelper.Pages
             }
         }
 
-        private void btnResetToDefault_Click(object sender, RoutedEventArgs e)
+        private void hypRemove_Click(object sender, RoutedEventArgs e)
         {
-            SettingsHelper.UpdateSettings(SettingsHelper.GetDefaultSettings());
-        }
-
-        private async void btnSave_Click(object sender, RoutedEventArgs e)
-        {
-            await SettingsHelper.SaveSettings();
-        }
-
-        private async void btnImport_Click(object sender, RoutedEventArgs e)
-        {
-            var saveFileDialog = new Microsoft.Win32.OpenFileDialog()
+            if (e.Source is Hyperlink item)
             {
-                AddExtension = true,
-                InitialDirectory = System.IO.Directory.GetCurrentDirectory(),
-                Filter = "JSON files|*.json|All files|*.*"
-            };
-
-            if (saveFileDialog.ShowDialog() ?? false)
-            {
-                await FormHelper.ExceptionDialogHandler(
-                    SettingsHelper.LoadSettings(true, saveFileDialog.FileName)
-                );
+                if (item.DataContext != null && SettingsHelper.Settings.Server_Servers.Any((x) => x.Server == item.DataContext.ToString()))
+                {
+                    SettingsHelper.Settings.Server_Servers.Remove(SettingsHelper.Settings.Server_Servers.First((x) => x.Server == item.DataContext.ToString()));
+                }
             }
         }
 
-        private async void btnExport_Click(object sender, RoutedEventArgs e)
+        private void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            var saveFileDialog = new Microsoft.Win32.SaveFileDialog()
-            {
-                AddExtension = true,
-                DefaultExt = ".json",
-                InitialDirectory = System.IO.Directory.GetCurrentDirectory(),
-                Filter = "JSON files|*.json|All files|*.*"
-            };
+            SetDefaults();
+        }
 
-            if (saveFileDialog.ShowDialog() ?? false)
-            {
-                await FormHelper.ExceptionDialogHandler(
-                    SettingsHelper.SaveSettings(false, saveFileDialog.FileName)
-                );
-            }
+        private void SecurtiyType_CheckChange(object sender, RoutedEventArgs e)
+        {
+            SettingsHelper.UpdateConnectionDetails(SettingsHelper.Settings);
+        }
+
+        private void SetDefaults()
+        {
         }
     }
 }
