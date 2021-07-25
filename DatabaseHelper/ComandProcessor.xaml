@@ -42,58 +42,58 @@
                          Padding="0"
                          materialDesign:HintAssist.Hint="Server"
                          Style="{DynamicResource MaterialDesignFloatingHintTextBox}"
-                         Text="{Binding ConnectionDetails.Server}" />
+                         Text="{Binding ConnectionDetails.Server, Mode=OneWay}" />
                 <Separator />
                 <TextBox x:Name="txtPort"
                          Margin="0,0,4,0"
                          Padding="0"
                          materialDesign:HintAssist.Hint="Port"
                          Style="{DynamicResource MaterialDesignFloatingHintTextBox}"
-                         Text="{Binding ConnectionDetails.Port}" />
+                         Text="{Binding ConnectionDetails.Port, Mode=OneWay}" />
                 <Separator />
                 <TextBox x:Name="txtDatabase"
                          Margin="0,0,4,0"
                          Padding="0"
                          materialDesign:HintAssist.Hint="Database"
                          Style="{DynamicResource MaterialDesignFloatingHintTextBox}"
-                         Text="{Binding ConnectionDetails.Database}" />
+                         Text="{Binding ConnectionDetails.Database, Mode=OneWay}" />
                 <Separator />
                 <TextBox x:Name="txtDomain"
                          Margin="0,0,4,0"
                          Padding="0"
                          materialDesign:HintAssist.Hint="Domain"
                          Style="{DynamicResource MaterialDesignFloatingHintTextBox}"
-                         Text="{Binding ConnectionDetails.Domain}" />
+                         Text="{Binding ConnectionDetails.Domain, Mode=OneWay}" />
                 <Separator />
                 <TextBox x:Name="txtUsername"
                          Margin="0,0,4,0"
                          Padding="0"
                          materialDesign:HintAssist.Hint="Username"
                          Style="{DynamicResource MaterialDesignFloatingHintTextBox}"
-                         Text="{Binding ConnectionDetails.Username}" />
+                         Text="{Binding ConnectionDetails.Username, Mode=OneWay}" />
                 <Separator />
                 <TextBox x:Name="txtPassword"
                          Margin="0,0,4,0"
                          Padding="0"
                          materialDesign:HintAssist.Hint="Password"
                          Style="{DynamicResource MaterialDesignFloatingHintTextBox}"
-                         Text="{Binding ConnectionDetails.Password}" />
+                         Text="{Binding ConnectionDetails.Password, Mode=OneWay}" />
                 <Separator />
                 <StackPanel Orientation="Horizontal">
                     <RadioButton GroupName="SQLSecurityType"
-                                 IsChecked="{Binding ConnectionDetails.UseSQLPassword}"
+                                 IsChecked="{Binding ConnectionDetails.UseSQLPassword, Mode=OneWay}"
                                  Style="{DynamicResource MaterialDesignChoiceChipPrimaryOutlineRadioButton}"
                                  ToolTip="SQL user">
                         <materialDesign:PackIcon Kind="FormTextboxPassword" />
                     </RadioButton>
                     <RadioButton GroupName="SQLSecurityType"
-                                 IsChecked="{Binding ConnectionDetails.UseActiveDirectory}"
+                                 IsChecked="{Binding ConnectionDetails.UseActiveDirectory, Mode=OneWay}"
                                  Style="{DynamicResource MaterialDesignChoiceChipPrimaryOutlineRadioButton}"
                                  ToolTip="Active directory">
                         <materialDesign:PackIcon Kind="Domain" />
                     </RadioButton>
                     <RadioButton GroupName="SQLSecurityType"
-                                 IsChecked="{Binding ConnectionDetails.UseIntegratedSecurity}"
+                                 IsChecked="{Binding ConnectionDetails.UseIntegratedSecurity, Mode=OneWay}"
                                  Style="{DynamicResource MaterialDesignChoiceChipPrimaryOutlineRadioButton}"
                                  ToolTip="Integrated security">
                         <materialDesign:PackIcon Kind="ShieldCheck" />
@@ -168,7 +168,9 @@
             </Grid.ColumnDefinitions>
             <ToolBarTray Grid.Column="0" IsLocked="True">
                 <ToolBar Height="34" Style="{DynamicResource MaterialDesignToolBar}">
-                    <ListBox Name="lsbConnections" Style="{DynamicResource MaterialDesignToolToggleListBox}">
+                    <ListBox Name="lsbConnections"
+                             IsEnabled="{Binding CanKillExistingConnections}"
+                             Style="{DynamicResource MaterialDesignToolToggleListBox}">
                         <ListBoxItem x:Name="lbiLeaveConnections"
                                      Padding="10,2,10,2"
                                      Style="{DynamicResource MaterialDesignToolToggleListBoxItem}"

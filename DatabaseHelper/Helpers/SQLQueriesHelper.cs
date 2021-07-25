@@ -23,10 +23,27 @@ namespace DatabaseHelper.Helpers
         private const string CREATE_SNAPSHOT = "SQL\\CreateSnapshot.sql";
         private const string DELETE_DATABASE = "SQL\\DeleteDatabase.sql";
         private const string DELETE_SNAPSHOT = "SQL\\DeleteSnapshot.sql";
+        private const string GET_ALL_DATABASES = "SQL\\GetAllDatabases.sql";
         private const string GET_DATABASES = "SQL\\GetDatabases.sql";
         private const string GET_SNAPSHOTS = "SQL\\GetSnapshots.sql";
         private const string KILL_EXISTING_CONNECTIONS = "SQL\\KillExistingConnections.sql";
+        private const string RESTORE_DATABASES = "SQL\\RestoreSnapshot.sql";
         private const string RESTORE_SNAPSHOTS = "SQL\\RestoreSnapshot.sql";
+
+        public static async Task<DataSet> GetAllDatabases(SQLConnectionDetails connectionDetails,
+                                                          ServerMessageEventHandler fncServerMessage = null,
+                                                          SqlInfoMessageEventHandler fncInfoMessage = null)
+        {
+            var connectionString = SQLHelper.GetConnectionString(connectionDetails);
+
+            var query = File.ReadAllText(GET_ALL_DATABASES);
+
+            return await SQLHelper.RunCommand(connectionString,
+                                              query,
+                                              null,
+                                              fncServerMessage,
+                                              fncInfoMessage);
+        }
 
         public static SQLQuery GetBackupDatabase(string database, string backupFilename, bool copyOnly, bool compression)
         {
@@ -112,6 +129,17 @@ namespace DatabaseHelper.Helpers
             return snapshots.Select((snapshot) => GetDeleteSnapshot(snapshot)).ToArray();
         }
 
+        public static SQLQuery GetRestoreDatabase(string database, string filename)
+        {
+            var query = File.ReadAllText(RESTORE_DATABASES);
+
+            var parameters = new SqlCommand().Parameters;
+            parameters.AddWithValue("@DatabaseName", database);
+            parameters.AddWithValue("@Filename", filename);
+
+            return new() { Query = query, Parameters = parameters };
+        }
+
         public static SQLQuery GetRestoreSnapshot(string snapshot, string database)
         {
             var query = File.ReadAllText(RESTORE_SNAPSHOTS);
@@ -167,11 +195,13 @@ namespace DatabaseHelper.Helpers
                                                    fncInfoMessage);
         }
 
-        public static string[] Split(string query)
+        public static SQLQuery[] Split(string query, SqlParameterCollection parameters)
         {
             const string QUERY_SEPARATOR = "^[\\ \\t]*GO[\\ \\t;]*$";
 
-            return Regex.Split(query, QUERY_SEPARATOR, RegexOptions.IgnoreCase);
+            var queries = Regex.Split(query, QUERY_SEPARATOR, RegexOptions.IgnoreCase);
+
+            return queries.Select((query) => new SQLQuery() { Query = query, Parameters = parameters }).ToArray();
         }
     }
 }

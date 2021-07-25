@@ -10,7 +10,6 @@
       d:DesignWidth="800"
       Background="{DynamicResource MaterialDesignPaper}"
       FontFamily="{DynamicResource MaterialDesignFont}"
-      Loaded="Page_Loaded"
       TextElement.FontSize="13"
       TextElement.FontWeight="Regular"
       TextElement.Foreground="{DynamicResource MaterialDesignBody}"
@@ -75,15 +74,17 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBox x:Name="txtScript"
+            <TextBox x:Name="txtFilename"
                      Grid.Column="0"
                      Margin="4"
                      HorizontalAlignment="Stretch"
                      materialDesign:HintAssist.Hint="Script filename"
                      Style="{DynamicResource MaterialDesignTextBox}"
                      Text="{Binding Source={x:Static helpers:SettingsHelper.Settings}, Path=ExecuteFile_LastFilename}" />
-            <Button Grid.Column="1"
+            <Button x:Name="btnSelectFile"
+                    Grid.Column="1"
                     Margin="4"
+                    Click="btnSelectFile_Click"
                     Content="..."
                     Style="{DynamicResource MaterialDesignFlatDarkBgButton}" />
         </Grid>
@@ -101,11 +102,15 @@
                   Style="{DynamicResource MaterialDesignDataGrid}"
                   VerticalScrollBarVisibility="Auto">
             <DataGrid.Columns>
-                <DataGridCheckBoxColumn Binding="{Binding Select}"
-                                        EditingElementStyle="{DynamicResource MaterialDesignDataGridCheckBoxColumnEditingStyle}"
-                                        ElementStyle="{DynamicResource MaterialDesignDataGridCheckBoxColumnStyle}"
-                                        Header="Select"
-                                        IsReadOnly="False" />
+                <DataGridTemplateColumn Header="Select">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <RadioButton HorizontalAlignment="Center"
+                                         IsChecked="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType=DataGridRow}}"
+                                         Style="{DynamicResource MaterialDesignDarkRadioButton}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTextColumn Binding="{Binding DatabaseName}"
                                     EditingElementStyle="{DynamicResource MaterialDesignDataGridTextColumnEditingStyle}"
                                     ElementStyle="{DynamicResource MaterialDesignDataGridTextColumnStyle}"

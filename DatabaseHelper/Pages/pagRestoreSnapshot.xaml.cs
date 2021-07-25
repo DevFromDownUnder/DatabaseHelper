@@ -30,6 +30,7 @@ namespace DatabaseHelper.Pages
                         var query = SQLQueriesHelper.GetRestoreSnapshot(snapshot, database);
 
                         ComandProcessor processor = FormHelper.GetNewCommandProcessor();
+                        processor.CanKillExistingConnections = true;
                         processor.KillExistingConnections = true;
                         processor.DatabasesToKill = new[] { database };
                         processor.Queries = new[] { query };

@@ -2,6 +2,7 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:helpers="clr-namespace:DatabaseHelper.Helpers"
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       Title="pagRestoreDatabase"
@@ -79,9 +80,12 @@
                      Margin="4"
                      HorizontalAlignment="Stretch"
                      materialDesign:HintAssist.Hint="Backup directory"
-                     Style="{DynamicResource MaterialDesignTextBox}" />
-            <Button Grid.Column="1"
+                     Style="{DynamicResource MaterialDesignFloatingHintTextBox}"
+                     Text="{Binding Source={x:Static helpers:SettingsHelper.Settings}, Path=RestoreDatabase_DefaultBackupFolder}" />
+            <Button Name="btnRestoreDatabase_DefaultBackupFolder"
+                    Grid.Column="1"
                     Margin="4"
+                    Click="btnRestoreDatabase_DefaultBackupFolder_Click"
                     Content="..."
                     Style="{DynamicResource MaterialDesignFlatDarkBgButton}" />
         </Grid>
@@ -89,10 +93,11 @@
                   Grid.Row="2"
                   Grid.Column="0"
                   AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
                   ColumnHeaderStyle="{DynamicResource MaterialDesignDataGridColumnHeader}"
                   ColumnWidth="Auto"
                   HorizontalScrollBarVisibility="Auto"
-                  IsReadOnly="True"
                   SelectionMode="Single"
                   SelectionUnit="FullRow"
                   Style="{DynamicResource MaterialDesignDataGrid}"
@@ -108,15 +113,16 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Binding="{Binding DatabaseName}"
+                <DataGridTextColumn Binding="{Binding Name}"
                                     EditingElementStyle="{DynamicResource MaterialDesignDataGridTextColumnEditingStyle}"
                                     ElementStyle="{DynamicResource MaterialDesignDataGridTextColumnStyle}"
                                     Header="Database name"
                                     IsReadOnly="False" />
-                <DataGridTextColumn Binding="{Binding DatabaseFilename}"
+                <DataGridTextColumn Binding="{Binding Filename}"
                                     EditingElementStyle="{DynamicResource MaterialDesignDataGridTextColumnEditingStyle}"
                                     ElementStyle="{DynamicResource MaterialDesignDataGridTextColumnStyle}"
-                                    Header="Database filename" />
+                                    Header="Database filename"
+                                    IsReadOnly="True" />
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

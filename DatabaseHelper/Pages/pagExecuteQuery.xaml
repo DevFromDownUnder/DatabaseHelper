@@ -10,7 +10,6 @@
       d:DesignWidth="800"
       Background="{DynamicResource MaterialDesignPaper}"
       FontFamily="{DynamicResource MaterialDesignFont}"
-      Loaded="Page_Loaded"
       TextElement.FontSize="13"
       TextElement.FontWeight="Regular"
       TextElement.Foreground="{DynamicResource MaterialDesignBody}"
@@ -19,16 +18,17 @@
       mc:Ignorable="d">
     <Grid>
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="5" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="5" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <ToolBarTray Grid.Row="0"
                      Grid.Column="0"
+                     Grid.ColumnSpan="3"
                      IsLocked="True">
             <ToolBar Margin="4,0,0,0"
                      ClipToBounds="False"
@@ -71,25 +71,10 @@
                 <Separator />
             </ToolBar>
         </ToolBarTray>
-        <TextBox x:Name="txtScript"
-                 Grid.Row="1"
-                 Grid.Column="0"
-                 HorizontalAlignment="Stretch"
-                 materialDesign:HintAssist.Hint="Query"
-                 AcceptsReturn="True"
-                 Style="{DynamicResource MaterialDesignFloatingHintTextBox}"
-                 Text="{Binding Source={x:Static helpers:SettingsHelper.Settings}, Path=ExecuteQuery_LastQuery}" />
-        <GridSplitter Grid.Row="2"
-                      Grid.Column="0"
-                      Height="5"
-                      HorizontalAlignment="Stretch"
-                      ResizeBehavior="PreviousAndNext"
-                      ResizeDirection="Rows"
-                      Style="{DynamicResource MaterialDesignGridSplitter}" />
         <DataGrid Name="dgDatabases"
-                  Grid.Row="3"
+                  Grid.Row="1"
                   Grid.Column="0"
-                  AlternatingRowBackground="{DynamicResource MaterialDesignDarkSeparatorBackground}"
+                  Width="Auto"
                   AutoGenerateColumns="False"
                   ColumnHeaderStyle="{DynamicResource MaterialDesignDataGridColumnHeader}"
                   ColumnWidth="Auto"
@@ -100,21 +85,36 @@
                   Style="{DynamicResource MaterialDesignDataGrid}"
                   VerticalScrollBarVisibility="Auto">
             <DataGrid.Columns>
-                <DataGridCheckBoxColumn Binding="{Binding Select}"
-                                        EditingElementStyle="{DynamicResource MaterialDesignDataGridCheckBoxColumnEditingStyle}"
-                                        ElementStyle="{DynamicResource MaterialDesignDataGridCheckBoxColumnStyle}"
-                                        Header="Select"
-                                        IsReadOnly="False" />
+                <DataGridTemplateColumn Header="Select">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <RadioButton HorizontalAlignment="Center"
+                                         IsChecked="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType=DataGridRow}}"
+                                         Style="{DynamicResource MaterialDesignDarkRadioButton}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTextColumn Binding="{Binding DatabaseName}"
                                     EditingElementStyle="{DynamicResource MaterialDesignDataGridTextColumnEditingStyle}"
                                     ElementStyle="{DynamicResource MaterialDesignDataGridTextColumnStyle}"
-                                    Header="Database name"
-                                    IsReadOnly="False" />
-                <DataGridTextColumn Binding="{Binding DatabaseFilename}"
-                                    EditingElementStyle="{DynamicResource MaterialDesignDataGridTextColumnEditingStyle}"
-                                    ElementStyle="{DynamicResource MaterialDesignDataGridTextColumnStyle}"
-                                    Header="Database filename" />
+                                    Header="Database name" />
             </DataGrid.Columns>
         </DataGrid>
+        <GridSplitter Grid.Row="1"
+                      Grid.Column="1"
+                      Width="5"
+                      VerticalAlignment="Stretch"
+                      ResizeBehavior="PreviousAndNext"
+                      ResizeDirection="Columns"
+                      Style="{DynamicResource MaterialDesignGridSplitter}" />
+        <TextBox x:Name="txtScript"
+                 Grid.Row="1"
+                 Grid.Column="2"
+                 Padding="5"
+                 HorizontalAlignment="Stretch"
+                 materialDesign:HintAssist.Hint="Query"
+                 AcceptsReturn="True"
+                 Style="{DynamicResource MaterialDesignFloatingHintTextBox}"
+                 Text="{Binding Source={x:Static helpers:SettingsHelper.Settings}, Path=ExecuteQuery_LastQuery}" />
     </Grid>
 </Page>

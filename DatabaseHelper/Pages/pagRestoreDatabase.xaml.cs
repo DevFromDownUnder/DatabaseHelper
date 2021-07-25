@@ -1,5 +1,9 @@
 ﻿using DatabaseHelper.Extensions;
 using DatabaseHelper.Helpers;
+using FolderBrowserEx;
+using Microsoft;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,8 +22,29 @@ namespace DatabaseHelper.Pages
 
         private void btnExecute_Click(object sender, RoutedEventArgs e)
         {
-            ComandProcessor processor = FormHelper.GetNewCommandProcessor("test");
-            processor.ShowDialog();
+            FormHelper.ExceptionDialogHandler(() =>
+            {
+                if (dgDatabases.SelectedItem != null)
+                {
+                    if (dgDatabases.SelectedItem is Result result)
+                    {
+                        var database = result.Name;
+                        var filename = result.Filename;
+
+                        Requires.NotNullOrWhiteSpace(database, "Database name must be specified");
+
+                        var query = SQLQueriesHelper.GetRestoreDatabase(database, filename);
+
+                        ComandProcessor processor = FormHelper.GetNewCommandProcessor();
+                        processor.CanKillExistingConnections = true;
+                        processor.KillExistingConnections = true;
+                        processor.DatabasesToKill = new[] { database };
+                        processor.Queries = new[] { query };
+
+                        processor.ShowDialog();
+                    }
+                }
+            });
         }
 
         private async void btnRefresh_Click(object sender, RoutedEventArgs e)
@@ -29,6 +54,21 @@ namespace DatabaseHelper.Pages
             );
         }
 
+        private void btnRestoreDatabase_DefaultBackupFolder_Click(object sender, RoutedEventArgs e)
+        {
+            var folderBrowserDialog = new FolderBrowserDialog()
+            {
+                InitialFolder = SettingsHelper.Settings.RestoreDatabase_DefaultBackupFolder.SafeTrim(),
+                AllowMultiSelect = false,
+                Title = "Select SQL backup folder"
+            };
+
+            if (folderBrowserDialog.ShowDialogB())
+            {
+                SettingsHelper.Settings.RestoreDatabase_DefaultBackupFolder = folderBrowserDialog.SelectedFolder.SafeTrim();
+            }
+        }
+
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             SetDefaults();
@@ -36,13 +76,22 @@ namespace DatabaseHelper.Pages
 
         private async Task Refresh()
         {
-            var results = await SQLQueriesHelper.GetDatabases(SettingsHelper.GetSQLConnectionDetails());
+            var files = await LogicHelper.GetFiles(SettingsHelper.Settings.RestoreDatabase_DefaultBackupFolder, "*.bak");
 
-            dgDatabases.ItemsSource = results?.Tables?.FirstOrDefault()?.DefaultView;
+            var results = files?.Select((f) => new Result() { Name = Path.GetFileNameWithoutExtension(f), Filename = f })?.ToList();
+
+            dgDatabases.ItemsSource = results;
         }
 
         private void SetDefaults()
         {
+        }
+
+        public class Result
+        {
+            public string Filename { get; set; }
+            public string Name { get; set; }
+            public bool Select { get; set; } = false;
         }
     }
 }

@@ -12,6 +12,12 @@ namespace DatabaseHelper.Helpers
     {
         public const string MASTER_DB = "master";
 
+        public static bool CanKillConnectionsForDatabase(string database)
+        {
+            //At the very least you can't kill the master DB, that would cause all sorts of problems
+            return !string.Equals(database, MASTER_DB, System.StringComparison.InvariantCultureIgnoreCase);
+        }
+
         public static string GetConnectionString(SQLConnectionDetails connectionDetails, bool useMasterOverride = false)
         {
             var connectionBuilder = new SqlConnectionStringBuilder()

@@ -23,17 +23,18 @@ namespace DatabaseHelper.Pages
             {
                 if (dgDatabases.ItemsSource != null)
                 {
-                    if (dgDatabases.ItemsSource is System.Data.DataRowView[] rows)
+                    if (dgDatabases.ItemsSource is System.Data.DataView view)
                     {
-                        var snapshots = rows?.Where((row) => row["Select"] is bool selected && selected)?.Select((row) => row["SnapshotName"].ToString())?.ToArray();
+                        var snapshots = view?.ToRows()?.Where((row) => row["Select"] is bool selected && selected)?.Select((row) => row["SnapshotName"].ToString())?.ToArray();
 
                         if (snapshots != null)
                         {
                             var queries = SQLQueriesHelper.GetDeleteSnapshots(snapshots);
 
                             ComandProcessor processor = FormHelper.GetNewCommandProcessor();
-                            processor.KillExistingConnections = true;
-                            processor.DatabasesToKill = snapshots;
+                            processor.CanKillExistingConnections = false;
+                            processor.KillExistingConnections = false;
+                            processor.DatabasesToKill = null;
                             processor.Queries = queries;
 
                             processor.ShowDialog();
@@ -54,7 +55,7 @@ namespace DatabaseHelper.Pages
         {
             var results = await SQLQueriesHelper.GetSnapshots(SettingsHelper.GetSQLConnectionDetails());
 
-            dgDatabases.ItemsSource = results?.Tables?.FirstOrDefault()?.DefaultView;
+            dgDatabases.ItemsSource = results?.Tables?.FirstOrDefault()?.AddSelectColumn()?.DefaultView;
         }
     }
 }

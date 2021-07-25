@@ -36,6 +36,7 @@ namespace DatabaseHelper.Pages
                 var query = SQLQueriesHelper.GetCreateSnapshot(database, databaseDataName, snapshot, snapshotFilename);
 
                 ComandProcessor processor = FormHelper.GetNewCommandProcessor();
+                processor.CanKillExistingConnections = true;
                 processor.KillExistingConnections = false;
                 processor.DatabasesToKill = new[] { database };
                 processor.Queries = new[] { query };

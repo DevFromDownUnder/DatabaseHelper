@@ -23,15 +23,16 @@ namespace DatabaseHelper.Pages
             {
                 if (dgDatabases.ItemsSource != null)
                 {
-                    if (dgDatabases.ItemsSource is System.Data.DataRowView[] rows)
+                    if (dgDatabases.ItemsSource is System.Data.DataView view)
                     {
-                        var databases = rows?.Where((row) => row["Select"] is bool selected && selected)?.Select((row) => row["DatabaseName"].ToString())?.ToArray();
+                        var databases = view?.ToRows()?.Where((row) => row["Select"] is bool selected && selected)?.Select((row) => row["DatabaseName"].ToString())?.ToArray();
 
                         if (databases != null)
                         {
                             var queries = SQLQueriesHelper.GetDeleteDatabases(databases);
 
                             ComandProcessor processor = FormHelper.GetNewCommandProcessor();
+                            processor.CanKillExistingConnections = true;
                             processor.KillExistingConnections = true;
                             processor.DatabasesToKill = databases;
                             processor.Queries = queries;

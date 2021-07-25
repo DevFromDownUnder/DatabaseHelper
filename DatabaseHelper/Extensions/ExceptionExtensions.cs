@@ -24,7 +24,7 @@ namespace DatabaseHelper.Extensions
 
         public static string FlattenExceptionMessagesToString(this Exception exception)
         {
-            return string.Join(Environment.NewLine, exception?.FlattenExceptionMessages() ?? new List<string>());
+            return string.Join(Environment.NewLine, exception?.FlattenExceptionMessages() ?? Array.Empty<string>());
         }
     }
 }

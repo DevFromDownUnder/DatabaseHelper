@@ -80,7 +80,7 @@
                   Style="{DynamicResource MaterialDesignDataGrid}"
                   VerticalScrollBarVisibility="Auto">
             <DataGrid.Columns>
-                <DataGridCheckBoxColumn Binding="{Binding Select}"
+                <DataGridCheckBoxColumn Binding="{Binding Select, UpdateSourceTrigger=PropertyChanged}"
                                         EditingElementStyle="{DynamicResource MaterialDesignDataGridCheckBoxColumnEditingStyle}"
                                         ElementStyle="{DynamicResource MaterialDesignDataGridCheckBoxColumnStyle}"
                                         Header="Select"

@@ -26,14 +26,15 @@ namespace DatabaseHelper
 
         public ComandProcessor(SQLConnectionDetails connectionDetails)
         {
-            InitializeComponent();
-
             //Need to set context for some reason it doesn't default
             DataContext = this;
 
             ConnectionDetails = connectionDetails;
+
+            InitializeComponent();
         }
 
+        public bool CanKillExistingConnections { get; set; }
         public SQLConnectionDetails ConnectionDetails { get; set; }
         public string[] DatabasesToKill { get; set; }
         public bool KillExistingConnections { get; set; }
@@ -105,16 +106,23 @@ namespace DatabaseHelper
 
             var connectionString = SQLHelper.GetConnectionString(ConnectionDetails);
 
-            if (KillExistingConnections)
+            if (CanKillExistingConnections && KillExistingConnections)
             {
                 foreach (var databaseToKill in DatabasesToKill)
                 {
-                    SQLQueriesHelper.KillExistingConnections(ConnectionDetails,
-                                                             databaseToKill,
-                                                             (object sender, ServerMessageEventArgs e) => mBackgroundWorker.ReportProgress(e.Error.ToString()),
-                                                             (object sender, SqlInfoMessageEventArgs e) => mBackgroundWorker.ReportProgress(e.Message)).Wait();
+                    if (SQLHelper.CanKillConnectionsForDatabase(databaseToKill))
+                    {
+                        SQLQueriesHelper.KillExistingConnections(ConnectionDetails,
+                                         databaseToKill,
+                                         (object sender, ServerMessageEventArgs e) => mBackgroundWorker.ReportProgress(e.Error.ToString()),
+                                         (object sender, SqlInfoMessageEventArgs e) => mBackgroundWorker.ReportProgress(e.Message)).Wait();
 
-                    mBackgroundWorker.ReportProgress($"Existing connections killed - [{databaseToKill}]");
+                        mBackgroundWorker.ReportProgress($"Existing connections killed - [{databaseToKill}]");
+                    } 
+                    else
+                    {
+                        mBackgroundWorker.ReportProgress($"Cannot kill system database [{databaseToKill}] - Skipped");
+                    }
                 }
             }
 

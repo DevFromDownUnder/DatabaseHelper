@@ -1,9 +1,11 @@
 ﻿using DatabaseHelper.Extensions;
 using DatabaseHelper.Helpers;
+using FolderBrowserEx;
+using Microsoft;
 using Microsoft.Toolkit.Uwp.UI;
 using System;
+using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -22,56 +24,47 @@ namespace DatabaseHelper.Pages
             InitializeComponent();
         }
 
-        private async void AddServerDialog_Click(object sender, RoutedEventArgs e)
+        private void AddServerDialog_Click(object sender, RoutedEventArgs e)
         {
-            if (e.Source is Button btnSource)
+            FormHelper.ExceptionDialogHandler(() =>
             {
-                if (sender is FrameworkElement dialogElement)
+                if (e.Source is Button btnSource)
                 {
-                    if (dialogElement.FindDescendant("txtAddServerServer") is TextBox txtAddServerServer)
+                    if (sender is FrameworkElement dialogElement)
                     {
-                        if (dialogElement.FindDescendant("txtAddServerPort") is TextBox txtAddServerPort)
+                        if (dialogElement.FindDescendant("txtAddServerServer") is TextBox txtAddServerServer)
                         {
-                            if (btnSource.Tag != null)
+                            if (dialogElement.FindDescendant("txtAddServerPort") is TextBox txtAddServerPort)
                             {
-                                var server = txtAddServerServer.Text.Trim();
-                                var port = txtAddServerPort.Text.Trim();
-
-                                switch (btnSource.Tag.ToString())
+                                if (btnSource.Tag != null)
                                 {
-                                    case "Add":
-                                        await FormHelper.ExceptionDialogHandlerAsync(
-                                            Task.Run(() =>
+                                    var server = txtAddServerServer.Text.Trim();
+                                    var port = txtAddServerPort.Text.Trim();
+
+                                    switch (btnSource.Tag.ToString())
+                                    {
+                                        case "Add":
+                                            Requires.NotNullOrEmpty(server, "Server must be populated");
+                                            Requires.NotNullOrEmpty(port, "Port must be populated");
+
+                                            if (!ushort.TryParse(port, out ushort serverPort))
                                             {
-                                                if (server.HasNoValue())
-                                                {
-                                                    throw new ArgumentException("Server must be populated");
-                                                }
+                                                throw new ArgumentException($"Port must be between {ushort.MinValue} and {ushort.MaxValue}");
+                                            }
 
-                                                if (port.HasNoValue())
-                                                {
-                                                    throw new ArgumentException("Port must be populated");
-                                                }
+                                            if (!SettingsHelper.Settings.Server_Servers.Any((x) => x.Server == server))
+                                            {
+                                                Dispatcher.Invoke(() => SettingsHelper.Settings.Server_Servers.Add(new() { Server = server, Port = serverPort }));
+                                            }
 
-                                                if (!ushort.TryParse(port, out ushort serverPort))
-                                                {
-                                                    throw new ArgumentException($"Port must be between {ushort.MinValue} and {ushort.MaxValue}");
-                                                }
-
-                                                if (!SettingsHelper.Settings.Server_Servers.Any((x) => x.Server == server))
-                                                {
-                                                    Dispatcher.Invoke(() => SettingsHelper.Settings.Server_Servers.Add(new() { Server = server, Port = serverPort }));
-                                                }
-                                            })
-                                        );
-
-                                        break;
+                                            break;
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
+            });
         }
 
         private void AddServerDialog_Loaded(object sender, RoutedEventArgs e)
@@ -116,113 +109,139 @@ namespace DatabaseHelper.Pages
 
         private async void btnExport_Click(object sender, RoutedEventArgs e)
         {
-            var saveFileDialog = new Microsoft.Win32.SaveFileDialog()
+            await FormHelper.ExceptionDialogHandlerAsync(async () =>
             {
-                AddExtension = true,
-                DefaultExt = ".json",
-                InitialDirectory = System.IO.Directory.GetCurrentDirectory(),
-                Filter = "JSON files|*.json|All files|*.*"
-            };
+                var saveFileDialog = new Microsoft.Win32.SaveFileDialog()
+                {
+                    AddExtension = true,
+                    DefaultExt = ".json",
+                    InitialDirectory = Directory.GetCurrentDirectory(),
+                    Filter = "JSON files|*.json|All files|*.*"
+                };
 
-            if (saveFileDialog.ShowDialog() ?? false)
-            {
-                await FormHelper.ExceptionDialogHandlerAsync(
-                    SettingsHelper.SaveSettings(false, saveFileDialog.FileName)
-                );
-            }
+                if (saveFileDialog.ShowDialog() ?? false)
+                {
+                    await SettingsHelper.SaveSettings(false, saveFileDialog.FileName);
+                }
+            });
         }
 
         private async void btnImport_Click(object sender, RoutedEventArgs e)
         {
-            var saveFileDialog = new Microsoft.Win32.OpenFileDialog()
+            await FormHelper.ExceptionDialogHandlerAsync(async () =>
             {
-                AddExtension = true,
-                InitialDirectory = System.IO.Directory.GetCurrentDirectory(),
-                Filter = "JSON files|*.json|All files|*.*"
-            };
+                var openFileDialog = new Microsoft.Win32.OpenFileDialog()
+                {
+                    AddExtension = true,
+                    InitialDirectory = Directory.GetCurrentDirectory(),
+                    Filter = "JSON files|*.json|All files|*.*"
+                };
 
-            if (saveFileDialog.ShowDialog() ?? false)
-            {
-                await FormHelper.ExceptionDialogHandlerAsync(
-                    SettingsHelper.LoadSettings(true, saveFileDialog.FileName)
-                );
-            }
+                if (openFileDialog.ShowDialog() ?? false)
+                {
+                    _ = await SettingsHelper.LoadSettings(true, openFileDialog.FileName);
+                }
+            });
         }
 
         private void btnResetToDefault_Click(object sender, RoutedEventArgs e)
         {
-            SettingsHelper.UpdateSettings(SettingsHelper.GetDefaultSettings());
+            FormHelper.ExceptionDialogHandler(() =>
+            {
+                SettingsHelper.UpdateSettings(SettingsHelper.GetDefaultSettings());
+            });
+        }
+
+        private void btnRestoreDatabase_DefaultBackupFolder_Click(object sender, RoutedEventArgs e)
+        {
+            FormHelper.ExceptionDialogHandler(() =>
+            {
+                var folderBrowserDialog = new FolderBrowserDialog()
+                {
+                    InitialFolder = SettingsHelper.Settings.RestoreDatabase_DefaultBackupFolder.SafeTrim(),
+                    AllowMultiSelect = false,
+                    Title = "Select SQL backup folder"
+                };
+
+                if (folderBrowserDialog.ShowDialogB())
+                {
+                    SettingsHelper.Settings.RestoreDatabase_DefaultBackupFolder = folderBrowserDialog.SelectedFolder.SafeTrim();
+                }
+            });
         }
 
         private async void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            await SettingsHelper.SaveSettings();
+            await FormHelper.ExceptionDialogHandlerAsync(async () =>
+            {
+                await SettingsHelper.SaveSettings();
+            });
         }
 
         private async void EditJsonDialog_Click(object sender, RoutedEventArgs e)
         {
-            if (e.Source is Button btnSource)
+            await FormHelper.ExceptionDialogHandlerAsync(async () =>
             {
-                if (sender is FrameworkElement dialogElement)
+                if (e.Source is Button btnSource)
                 {
-                    if (dialogElement.FindDescendant("txtJson") is TextBox txtJson)
+                    if (sender is FrameworkElement dialogElement)
                     {
-                        if (btnSource.Tag != null)
+                        if (dialogElement.FindDescendant("txtJson") is TextBox txtJson)
                         {
-                            var json = txtJson.Text;
-
-                            switch (btnSource.Tag.ToString())
+                            if (btnSource.Tag != null)
                             {
-                                case "Save":
-                                    await FormHelper.ExceptionDialogHandlerAsync(
-                                          FormHelper.LoadingFlatDarkBgButton(() => SettingsHelper.UpdateSettings(SettingsHelper.ParseUserSettingsJson(json)), btnSource)
-                                    );
+                                var json = txtJson.Text;
 
-                                    break;
+                                switch (btnSource.Tag.ToString())
+                                {
+                                    case "Save":
+                                        await FormHelper.LoadingFlatDarkBgButton(() => SettingsHelper.UpdateSettings(SettingsHelper.ParseUserSettingsJson(json)), btnSource);
+                                        break;
 
-                                case "Parse":
-                                    await FormHelper.ExceptionDialogHandlerAsync(
-                                        FormHelper.LoadingFlatDarkBgButton(() => SettingsHelper.ParseUserSettingsJson(json), btnSource)
-                                    );
+                                    case "Parse":
+                                        await FormHelper.LoadingFlatDarkBgButton(() => SettingsHelper.ParseUserSettingsJson(json), btnSource);
+                                        break;
 
-                                    break;
-
-                                case "Format":
-                                    await FormHelper.ExceptionDialogHandlerAsync(
-                                        FormHelper.LoadingFlatDarkBgButton(() => Dispatcher.Invoke(() => txtJson.Text = SettingsHelper.FormatUserSettingsJson(json)), btnSource)
-                                    );
-
-                                    break;
+                                    case "Format":
+                                        await FormHelper.LoadingFlatDarkBgButton(() => Dispatcher.Invoke(() => txtJson.Text = SettingsHelper.FormatUserSettingsJson(json)), btnSource);
+                                        break;
+                                }
                             }
                         }
                     }
                 }
-            }
+            });
         }
 
         private void EditJsonDialog_Loaded(object sender, RoutedEventArgs e)
         {
-            if (e.Source is Grid)
+            FormHelper.ExceptionDialogHandler(() =>
             {
-                if (sender is FrameworkElement dialogElement)
+                if (e.Source is Grid)
                 {
-                    if (dialogElement.FindDescendant("txtJson") is TextBox txtJson)
+                    if (sender is FrameworkElement dialogElement)
                     {
-                        txtJson.Text = SettingsHelper.GetSettingsJson();
+                        if (dialogElement.FindDescendant("txtJson") is TextBox txtJson)
+                        {
+                            txtJson.Text = SettingsHelper.GetSettingsJson();
+                        }
                     }
                 }
-            }
+            });
         }
 
         private void hypRemove_Click(object sender, RoutedEventArgs e)
         {
-            if (e.Source is Hyperlink item)
+            FormHelper.ExceptionDialogHandler(() =>
             {
-                if (item.DataContext != null && SettingsHelper.Settings.Server_Servers.Any((x) => x.Server == item.DataContext.ToString()))
+                if (e.Source is Hyperlink item)
                 {
-                    SettingsHelper.Settings.Server_Servers.Remove(SettingsHelper.Settings.Server_Servers.First((x) => x.Server == item.DataContext.ToString()));
+                    if (item.DataContext != null && SettingsHelper.Settings.Server_Servers.Any((x) => x.Server == item.DataContext.ToString()))
+                    {
+                        SettingsHelper.Settings.Server_Servers.Remove(SettingsHelper.Settings.Server_Servers.First((x) => x.Server == item.DataContext.ToString()));
+                    }
                 }
-            }
+            });
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
@@ -232,7 +251,10 @@ namespace DatabaseHelper.Pages
 
         private void SecurtiyType_CheckChange(object sender, RoutedEventArgs e)
         {
-            SettingsHelper.UpdateConnectionDetails(SettingsHelper.Settings);
+            FormHelper.ExceptionDialogHandler(() =>
+            {
+                SettingsHelper.UpdateConnectionDetails(SettingsHelper.Settings);
+            });
         }
 
         private void SetDefaults()

@@ -34,6 +34,7 @@ namespace DatabaseHelper.Pages
                 var query = SQLQueriesHelper.GetBackupDatabase(database, backupFilename, copyOnly, compress);
 
                 ComandProcessor processor = FormHelper.GetNewCommandProcessor();
+                processor.CanKillExistingConnections = true;
                 processor.KillExistingConnections = false;
                 processor.DatabasesToKill = new[] { database };
                 processor.Queries = new[] { query };
